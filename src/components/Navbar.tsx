@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Instagram, Facebook, Mail } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const Navbar = () => {
+    const location = useLocation();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -56,7 +58,7 @@ const Navbar = () => {
                     {navLinks.map((link) => (
                         <a
                             key={link.name}
-                            href={link.href}
+                            href={location.pathname === "/" ? link.href : `/${link.href}`}
                             className="text-sm font-medium text-white/90 hover:text-white transition-colors hover:translate-y-[-1px] transform duration-200"
                         >
                             {link.name}
@@ -103,9 +105,11 @@ const Navbar = () => {
                             <Mail className="w-5 h-5 text-white/90 group-hover:text-white group-hover:scale-110 transition-transform" />
                         </a>
                     </div>
-                    <button className="bg-white text-primary px-6 py-2.5 rounded-full text-sm font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-                        Agendar Cita
-                    </button>
+                    <Link to="/book">
+                        <button className="bg-white text-primary px-6 py-2.5 rounded-full text-sm font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                            Agendar Cita
+                        </button>
+                    </Link>
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -126,16 +130,18 @@ const Navbar = () => {
                         {navLinks.map((link) => (
                             <a
                                 key={link.name}
-                                href={link.href}
+                                href={location.pathname === "/" ? link.href : `/${link.href}`}
                                 className="text-base font-medium text-gray-700 hover:text-primary py-2 border-b border-gray-50 last:border-0"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 {link.name}
                             </a>
                         ))}
-                        <button className="w-full bg-primary text-white px-6 py-3 rounded-lg text-sm font-semibold shadow-md mt-2">
-                            Agendar Consulta
-                        </button>
+                        <Link to="/book" onClick={() => setIsMobileMenuOpen(false)}>
+                            <button className="w-full bg-primary text-white px-6 py-3 rounded-lg text-sm font-semibold shadow-md mt-2">
+                                Agendar Consulta
+                            </button>
+                        </Link>
 
                         <div className="flex items-center justify-center gap-4 mt-2 pt-4 border-t border-gray-100">
                             <a
