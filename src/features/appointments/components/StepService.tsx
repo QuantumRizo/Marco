@@ -1,5 +1,4 @@
 import type { Service, AppointmentReason } from '../types';
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -20,12 +19,9 @@ interface StepServiceProps {
 }
 
 export const StepService = ({
-    services,
     selectedReason,
-    selectedServiceId,
     serviceDescription = '',
     onSelectReason,
-    onSelectService,
     onServiceDescriptionChange,
     onNext,
     onBack
@@ -40,7 +36,7 @@ export const StepService = ({
             <div className="space-y-6">
                 <RadioGroup
                     value={selectedReason}
-                    onValueChange={(val) => onSelectReason(val as AppointmentReason)}
+                    onValueChange={(val: string) => onSelectReason(val as AppointmentReason)}
                     className="grid md:grid-cols-3 gap-4"
                 >
                     <Label

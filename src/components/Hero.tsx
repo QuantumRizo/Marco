@@ -20,7 +20,7 @@ const Hero = () => {
                         {/* Badge */}
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/50 backdrop-blur-sm border border-gray-100 rounded-full w-fit shadow-sm">
                             <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                            <span className="text-xs font-semibold text-primary uppercase tracking-wider">Especialista Certificado</span>
+                            <span className="text-xs font-semibold text-primary uppercase tracking-wider">Médico Certificado por el Consejo Mexicano de Ortopedia y Traumatología 15/6243/22</span>
                         </div>
 
                         {/* Headlines */}

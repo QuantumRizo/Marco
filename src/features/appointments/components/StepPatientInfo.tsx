@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea"; // Assuming we have this, if not I'll fallback to standard textarea
+// Textarea import removed as it was unused
 import { useState } from "react";
 
 interface PatientInfo {

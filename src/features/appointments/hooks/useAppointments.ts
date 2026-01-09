@@ -19,7 +19,7 @@ export const useAppointments = () => {
 
             if (appointmentsError) throw appointmentsError;
 
-            const mappedAppointments: Appointment[] = (appointmentsData || []).map(a => ({
+            const mappedAppointments: Appointment[] = (appointmentsData || []).map((a: any) => ({
                 id: a.id,
                 hospitalId: a.hospital_id,
                 serviceId: a.service_id,

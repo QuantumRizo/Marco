@@ -17,10 +17,10 @@ const Specialties = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="flex flex-wrap justify-center gap-8">
 
                     {/* Lesiones de rodilla */}
-                    <div className="group p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1">
+                    <div className="w-full md:w-[calc(50%-2rem)] lg:w-[30%] group p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1">
                         <div className="w-16 h-16 mx-auto mb-6 bg-[#94c021]/20 rounded-full flex items-center justify-center group-hover:bg-[#94c021]/30 transition-colors">
                             <Bone className="w-8 h-8 text-[#94c021]" />
                         </div>
@@ -30,8 +30,30 @@ const Specialties = () => {
                         </p>
                     </div>
 
+                    {/* Artroscopia */}
+                    <div className="w-full md:w-[calc(50%-2rem)] lg:w-[30%] group p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1">
+                        <div className="w-16 h-16 mx-auto mb-6 bg-[#94c021]/20 rounded-full flex items-center justify-center group-hover:bg-[#94c021]/30 transition-colors">
+                            <Activity className="w-8 h-8 text-[#94c021]" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-3">Artroscopia</h3>
+                        <p className="text-white/60 leading-relaxed">
+                            Preservación de meniscos y cartílago articular. Lesiones ligamentarias.
+                        </p>
+                    </div>
+
+                    {/* Reemplazos Articulares */}
+                    <div className="w-full md:w-[calc(50%-2rem)] lg:w-[30%] group p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1">
+                        <div className="w-16 h-16 mx-auto mb-6 bg-[#94c021]/20 rounded-full flex items-center justify-center group-hover:bg-[#94c021]/30 transition-colors">
+                            <Activity className="w-8 h-8 text-[#94c021]" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-3">Reemplazos Articulares</h3>
+                        <p className="text-white/60 leading-relaxed">
+                            Ofrecemos soluciones avanzadas para restaurar tus articulaciones. Tecnología de última generación para una recuperación eficiente y mejor calidad de vida.
+                        </p>
+                    </div>
+
                     {/* Ortopedia deportiva */}
-                    <div className="group p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1">
+                    <div className="w-full md:w-[calc(50%-2rem)] lg:w-[30%] group p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1">
                         <div className="w-16 h-16 mx-auto mb-6 bg-[#94c021]/20 rounded-full flex items-center justify-center group-hover:bg-[#94c021]/30 transition-colors">
                             <Move className="w-8 h-8 text-[#94c021]" />
                         </div>
@@ -41,14 +63,14 @@ const Specialties = () => {
                         </p>
                     </div>
 
-                    {/* Artroscopia */}
-                    <div className="group p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1">
+                    {/* Traumatología */}
+                    <div className="w-full md:w-[calc(50%-2rem)] lg:w-[30%] group p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1">
                         <div className="w-16 h-16 mx-auto mb-6 bg-[#94c021]/20 rounded-full flex items-center justify-center group-hover:bg-[#94c021]/30 transition-colors">
-                            <Activity className="w-8 h-8 text-[#94c021]" />
+                            <Bone className="w-8 h-8 text-[#94c021]" />
                         </div>
-                        <h3 className="text-xl font-bold mb-3">Cirugía Articular</h3>
+                        <h3 className="text-xl font-bold mb-3">Traumatología</h3>
                         <p className="text-white/60 leading-relaxed">
-                            Técnicas mínimamente invasivas como la Artroscopia para pronta recuperación.
+                            Atención especializada en fracturas, luxaciones y esguinces para restaurar la integridad ósea.
                         </p>
                     </div>
 

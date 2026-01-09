@@ -38,7 +38,7 @@ export const StepDateTime = ({
                             mode="single"
                             selected={date}
                             onSelect={onSelectDate}
-                            disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
+                            disabled={(date: Date) => date < new Date() || date < new Date("1900-01-01")}
                             initialFocus
                             className="rounded-md"
                             locale={es}

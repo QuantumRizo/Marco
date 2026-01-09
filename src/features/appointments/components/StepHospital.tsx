@@ -1,5 +1,5 @@
 import type { Hospital } from '../types';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 
@@ -23,8 +23,8 @@ export const StepHospital = ({ hospitals, selectedHospitalId, onSelect, onNext }
                     <Card
                         key={hospital.id}
                         className={`cursor-pointer transition-all hover:scale-105 hover:shadow-lg border-2 flex items-center p-4 gap-4 ${selectedHospitalId === hospital.id
-                                ? 'border-[#94c021] bg-[#94c021]/5 ring-1 ring-[#94c021]'
-                                : 'border-transparent hover:border-gray-100'
+                            ? 'border-[#94c021] bg-[#94c021]/5 ring-1 ring-[#94c021]'
+                            : 'border-transparent hover:border-gray-100'
                             }`}
                         onClick={() => onSelect(hospital.id)}
                     >

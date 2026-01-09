@@ -5,24 +5,30 @@ const Locations = () => {
         {
             name: "Hospital Angeles Lindavista",
             mapQuery: "Hospital+Angeles+Lindavista",
-            phone: "+525557547000",
-            phoneDisplay: "(55) 5754 7000",
+            phones: [
+                { number: "+525557544128", display: "55 5754 4128" },
+                { number: "+525560004312", display: "55 6000 4312" }
+            ],
             website: "https://hospitalangeles.com/lindavista",
             mapLink: "https://maps.app.goo.gl/qMjNAcxeuxTsoGUY8"
         },
         {
             name: "Star Médica Lomas Verdes",
             mapQuery: "Star+Medica+Lomas+Verdes",
-            phone: "+525526251700",
-            phoneDisplay: "(55) 2625 1700",
+            phones: [
+                { number: "+525557544253", display: "55 5754 4253" },
+                { number: "+525560004312", display: "55 6000 4312" }
+            ],
             website: "https://www.starmedica.com/",
             mapLink: "https://maps.app.goo.gl/uNoB4KWTqbToKQbY8"
         },
         {
             name: "Star Médica Luna Parc",
             mapQuery: "Star+Medica+Luna+Parc",
-            phone: "+525558646464",
-            phoneDisplay: "(55) 5864 6464",
+            phones: [
+                { number: "+525558646464", display: "(55) 5864 6464" },
+                { number: "+525537117674", display: "55 3711 7674" }
+            ],
             website: "https://www.starmedica.com/",
             mapLink: "https://maps.app.goo.gl/Zsm6tbED9rahDtidA"
         }
@@ -82,13 +88,17 @@ const Locations = () => {
                                 </div>
 
                                 <div className="space-y-3 mt-auto">
-                                    <a
-                                        href={`tel:${loc.phone}`}
-                                        className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-[#94c021]/10 text-gray-700 hover:text-[#94c021] transition-colors border border-gray-100 group-hover:border-[#94c021]/20"
-                                    >
-                                        <Phone className="w-5 h-5" />
-                                        <span className="font-medium">{loc.phoneDisplay}</span>
-                                    </a>
+                                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Números para agendar cita:</p>
+                                    {loc.phones.map((phone, i) => (
+                                        <a
+                                            key={i}
+                                            href={`tel:${phone.number}`}
+                                            className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-[#94c021]/10 text-gray-700 hover:text-[#94c021] transition-colors border border-gray-100 group-hover:border-[#94c021]/20"
+                                        >
+                                            <Phone className="w-5 h-5" />
+                                            <span className="font-medium">{phone.display}</span>
+                                        </a>
+                                    ))}
 
                                     <a
                                         href={loc.website}
