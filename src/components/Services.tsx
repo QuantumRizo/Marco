@@ -41,7 +41,7 @@ const Services = () => {
                             Enfermedades Tratadas
                         </h3>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                        <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-4">
                             {[
                                 "Lesiones deportivas",
                                 "Lesiones de cartílago articular",
@@ -57,7 +57,7 @@ const Services = () => {
                                 "Lesiones ligamentarias en mano y muñeca",
                                 "Fracturas y luxaciones"
                             ].map((item, index) => (
-                                <div key={index} className="flex items-start gap-3 group">
+                                <div key={index} className="flex items-start gap-3 group break-inside-avoid mb-4">
                                     <div className="w-1.5 h-1.5 rounded-full bg-blue-300 mt-2.5 flex-shrink-0 group-hover:scale-150 transition-transform" />
                                     <span className="text-gray-300 group-hover:text-white transition-colors leading-relaxed text-sm">
                                         {item}

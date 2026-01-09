@@ -1,14 +1,16 @@
 import Hero from "@/components/Hero";
-import Services from "@/components/Services";
-import Experience from "@/components/Experience";
+import TrustBar from "@/components/TrustBar";
+import About from "@/components/About";
+import Specialties from "@/components/Specialties";
 import Layout from "@/layouts/Layout";
 
 const Index = () => {
     return (
         <Layout>
             <Hero />
-            <Services />
-            <Experience />
+            <TrustBar />
+            <About />
+            <Specialties />
         </Layout>
     );
 };
