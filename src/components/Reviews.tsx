@@ -35,7 +35,7 @@ const Reviews = () => {
             <div className="container mx-auto px-4 md:px-6">
 
                 <div className="text-center mb-16 space-y-4">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 rounded-full w-fit">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#94c021]/10 rounded-full w-fit">
                         <span className="text-xs font-semibold text-[#1c334a] uppercase tracking-wider">Testimonios</span>
                     </div>
                     <h2 className="text-3xl md:text-4xl font-bold text-[#1c334a]">
@@ -54,7 +54,7 @@ const Reviews = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {reviews.map((review, index) => (
                         <div key={index} className="bg-gray-50 rounded-2xl p-8 relative hover:shadow-lg transition-shadow duration-300 border border-gray-100 flex flex-col h-full">
-                            <Quote className="absolute top-6 right-6 w-8 h-8 text-blue-100 rotate-180" />
+                            <Quote className="absolute top-6 right-6 w-8 h-8 text-[#94c021]/20 rotate-180" />
 
                             <div className="flex flex-col h-full">
                                 {/* Header */}

@@ -18,7 +18,7 @@ const About = () => {
                         </div>
 
                         {/* Quote */}
-                        <div className="max-w-sm mx-auto bg-blue-50/50 p-6 rounded-xl border border-blue-100">
+                        <div className="max-w-sm mx-auto bg-[#94c021]/10 p-6 rounded-xl border border-[#94c021]/20">
                             <p className="text-gray-600 italic text-center">
                                 "Mi prioridad es que mis pacientes recuperen su calidad de vida con tratamientos efectivos y claros."
                             </p>
@@ -41,13 +41,13 @@ const About = () => {
 
                         {/* Header */}
                         <div className="text-center lg:text-left">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 rounded-full w-fit mb-4">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#94c021]/10 rounded-full w-fit mb-4">
                                 <span className="text-xs font-semibold text-[#1c334a] uppercase tracking-wider">Sobre el Especialista</span>
                             </div>
                             <h2 className="text-4xl lg:text-5xl font-bold text-[#1c334a] mb-2">
                                 Dr. Marco Alvarado Sanchez
                             </h2>
-                            <p className="text-xl text-blue-600 font-medium">
+                            <p className="text-xl text-[#94c021] font-medium">
                                 Especialista en Ortopedia y Traumatología
                             </p>
                         </div>

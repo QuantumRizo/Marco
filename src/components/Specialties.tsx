@@ -7,7 +7,7 @@ const Specialties = () => {
 
                 <div className="max-w-2xl mx-auto mb-16 space-y-4">
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full w-fit">
-                        <span className="text-xs font-semibold text-blue-300 uppercase tracking-wider">Tratamientos</span>
+                        <span className="text-xs font-semibold text-[#94c021] uppercase tracking-wider">Tratamientos</span>
                     </div>
                     <h2 className="text-3xl md:text-4xl font-bold">
                         Especialidades Médicas
@@ -21,8 +21,8 @@ const Specialties = () => {
 
                     {/* Lesiones de rodilla */}
                     <div className="group p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1">
-                        <div className="w-16 h-16 mx-auto mb-6 bg-blue-500/20 rounded-full flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
-                            <Bone className="w-8 h-8 text-blue-300" />
+                        <div className="w-16 h-16 mx-auto mb-6 bg-[#94c021]/20 rounded-full flex items-center justify-center group-hover:bg-[#94c021]/30 transition-colors">
+                            <Bone className="w-8 h-8 text-[#94c021]" />
                         </div>
                         <h3 className="text-xl font-bold mb-3">Lesiones de rodilla</h3>
                         <p className="text-white/60 leading-relaxed">
@@ -32,8 +32,8 @@ const Specialties = () => {
 
                     {/* Ortopedia deportiva */}
                     <div className="group p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1">
-                        <div className="w-16 h-16 mx-auto mb-6 bg-blue-500/20 rounded-full flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
-                            <Move className="w-8 h-8 text-blue-300" />
+                        <div className="w-16 h-16 mx-auto mb-6 bg-[#94c021]/20 rounded-full flex items-center justify-center group-hover:bg-[#94c021]/30 transition-colors">
+                            <Move className="w-8 h-8 text-[#94c021]" />
                         </div>
                         <h3 className="text-xl font-bold mb-3">Ortopedia deportiva</h3>
                         <p className="text-white/60 leading-relaxed">
@@ -43,8 +43,8 @@ const Specialties = () => {
 
                     {/* Artroscopia */}
                     <div className="group p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1">
-                        <div className="w-16 h-16 mx-auto mb-6 bg-blue-500/20 rounded-full flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
-                            <Activity className="w-8 h-8 text-blue-300" />
+                        <div className="w-16 h-16 mx-auto mb-6 bg-[#94c021]/20 rounded-full flex items-center justify-center group-hover:bg-[#94c021]/30 transition-colors">
+                            <Activity className="w-8 h-8 text-[#94c021]" />
                         </div>
                         <h3 className="text-xl font-bold mb-3">Cirugía Articular</h3>
                         <p className="text-white/60 leading-relaxed">

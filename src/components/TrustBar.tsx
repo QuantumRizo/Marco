@@ -8,7 +8,7 @@ const TrustBar = () => {
 
                     {/* Cédula */}
                     <div className="flex flex-col items-center text-center gap-3">
-                        <div className="p-3 rounded-full bg-white/5 text-blue-300">
+                        <div className="p-3 rounded-full bg-white/5 text-[#94c021]">
                             <BookOpen className="w-8 h-8" />
                         </div>
                         <div>
@@ -19,7 +19,7 @@ const TrustBar = () => {
 
                     {/* UNAM */}
                     <div className="flex flex-col items-center text-center gap-3">
-                        <div className="p-3 rounded-full bg-white/5 text-blue-300">
+                        <div className="p-3 rounded-full bg-white/5 text-[#94c021]">
                             <Award className="w-8 h-8" />
                         </div>
                         <div>
@@ -30,7 +30,7 @@ const TrustBar = () => {
 
                     {/* Hospitales */}
                     <div className="flex flex-col items-center text-center gap-3">
-                        <div className="p-3 rounded-full bg-white/5 text-blue-300">
+                        <div className="p-3 rounded-full bg-white/5 text-[#94c021]">
                             <Building2 className="w-8 h-8" />
                         </div>
                         <div>

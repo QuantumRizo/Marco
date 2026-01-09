@@ -8,7 +8,7 @@ const Hero = () => {
                 {/* Soft gradient blob top right */}
                 <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl opacity-60 animate-float" />
                 {/* Soft gradient blob bottom left */}
-                <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-100/30 rounded-full blur-3xl opacity-50" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-[#94c021]/10 rounded-full blur-3xl opacity-50" />
             </div>
 
             <div className="container px-4 md:px-6 mx-auto h-full">
@@ -26,8 +26,8 @@ const Hero = () => {
                         {/* Headlines */}
                         <div className="space-y-2">
                             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-[1.1]">
-                                Recupera tu <span className="text-primary">Movimiento</span>,<br />
-                                Recupera tu <span className="text-primary">Vida.</span>
+                                Recupera tu <span className="text-[#94c021]">Movimiento</span>,<br />
+                                Recupera tu <span className="text-[#94c021]">Vida.</span>
                             </h1>
                             <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-lg">
                                 Ortopedia de vanguardia y cirugía de mínima invasión.

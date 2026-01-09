@@ -34,7 +34,7 @@ const Locations = () => {
 
                 <div className="text-center mb-16 space-y-4">
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full w-fit">
-                        <span className="text-xs font-semibold text-blue-300 uppercase tracking-wider">Ubicación</span>
+                        <span className="text-xs font-semibold text-[#94c021] uppercase tracking-wider">Ubicación</span>
                     </div>
                     <h2 className="text-3xl md:text-4xl font-bold text-white">
                         Sedes de Atención
@@ -64,7 +64,7 @@ const Locations = () => {
                                     href={loc.mapLink}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="absolute top-4 right-4 p-2 bg-white rounded-lg shadow-md text-[#1c334a] hover:bg-blue-50 transition-colors"
+                                    className="absolute top-4 right-4 p-2 bg-white rounded-lg shadow-md text-[#1c334a] hover:bg-[#94c021]/10 transition-colors"
                                     title="Ver en Google Maps"
                                 >
                                     <ExternalLink className="w-5 h-5" />
@@ -76,7 +76,7 @@ const Locations = () => {
                                 <div>
                                     <h3 className="text-xl font-bold text-[#1c334a] mb-2">{loc.name}</h3>
                                     <div className="flex items-center gap-2 text-gray-500 text-sm">
-                                        <MapPin className="w-4 h-4 shrink-0 text-blue-500" />
+                                        <MapPin className="w-4 h-4 shrink-0 text-[#94c021]" />
                                         <span>Consultorio Especializado</span>
                                     </div>
                                 </div>
@@ -84,7 +84,7 @@ const Locations = () => {
                                 <div className="space-y-3 mt-auto">
                                     <a
                                         href={`tel:${loc.phone}`}
-                                        className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 transition-colors border border-gray-100 group-hover:border-blue-100"
+                                        className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-[#94c021]/10 text-gray-700 hover:text-[#94c021] transition-colors border border-gray-100 group-hover:border-[#94c021]/20"
                                     >
                                         <Phone className="w-5 h-5" />
                                         <span className="font-medium">{loc.phoneDisplay}</span>
@@ -94,7 +94,7 @@ const Locations = () => {
                                         href={loc.website}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 transition-colors border border-gray-100 group-hover:border-blue-100"
+                                        className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-[#94c021]/10 text-gray-700 hover:text-[#94c021] transition-colors border border-gray-100 group-hover:border-[#94c021]/20"
                                     >
                                         <Globe className="w-5 h-5" />
                                         <span className="font-medium">Visitar Sitio Web</span>
