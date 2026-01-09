@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format, isAfter, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Search, MapPin, User, Calendar, Clock, FileText, ArrowRight, Phone, Mail, History } from 'lucide-react';
+import { Search, MapPin, User, Calendar, FileText, ArrowRight, Phone, Mail, History } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 
 export const AdminDashboard = () => {
