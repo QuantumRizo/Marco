@@ -1,6 +1,6 @@
 import Hero from "@/components/Hero";
-
 import Services from "@/components/Services";
+import Experience from "@/components/Experience";
 import Layout from "@/layouts/Layout";
 
 const Index = () => {
@@ -8,6 +8,7 @@ const Index = () => {
         <Layout>
             <Hero />
             <Services />
+            <Experience />
         </Layout>
     );
 };
