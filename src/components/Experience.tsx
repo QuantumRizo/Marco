@@ -30,11 +30,11 @@ const Experience = () => {
                             </h3>
                             <ul className="space-y-4">
                                 <li className="bg-slate-50 p-4 rounded-xl border border-gray-100">
-                                    <p className="text-gray-800 font-medium">Especialidad en ortopedia y traumatología</p>
+                                    <p className="text-gray-800 font-medium">Especialidad en Ortopedia y Traumatología</p>
                                     <p className="text-sm text-[#1c334a] mt-1">UNAM</p>
                                 </li>
                                 <li className="bg-slate-50 p-4 rounded-xl border border-gray-100">
-                                    <p className="text-gray-800 font-medium">Alta especialidad en cirugía articular y artroscopia</p>
+                                    <p className="text-gray-800 font-medium">Alta Especialidad en Cirugía Articular y Artroscopia</p>
                                     <p className="text-sm text-[#1c334a] mt-1">La Salle</p>
                                 </li>
                             </ul>
@@ -49,7 +49,7 @@ const Experience = () => {
                                 Premios y Distinciones
                             </h3>
                             <div className="bg-slate-50 p-4 rounded-xl border border-gray-100">
-                                <p className="text-gray-800 font-medium">Mención honorífica en la especialidad de ortopedia</p>
+                                <p className="text-gray-800 font-medium">Mención honorífica en la especialidad de Ortopedia</p>
                                 <p className="text-sm text-[#1c334a] mt-1">UNAM</p>
                             </div>
                         </div>

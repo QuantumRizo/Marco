@@ -18,8 +18,8 @@ const Services = () => {
                             <ul className="space-y-4">
                                 {[
                                     "Hospital Angeles Lindavista",
-                                    "Hospital Star Medica Lomas Verdes",
-                                    "Hospital Star Medica Luna Parc"
+                                    "Hospital Star Médica Lomas Verdes",
+                                    "Hospital Star Médica Luna Parc"
                                 ].map((hospital, index) => (
                                     <li key={index} className="flex items-start gap-3 bg-white/5 p-4 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
                                         <div className="p-2 bg-blue-300/10 rounded-lg shrink-0">
@@ -46,7 +46,7 @@ const Services = () => {
                                 "Lesiones deportivas",
                                 "Lesiones de cartílago articular",
                                 "Enfermedad articular degenerativa",
-                                "Lesión de Ligamentarias de Rodilla",
+                                "Lesiones ligamentarias de rodilla",
                                 "Fracturas",
                                 "Luxación Acromioclavicular",
                                 "Tendinitis del manguito de los rotadores",

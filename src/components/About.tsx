@@ -56,10 +56,12 @@ const About = () => {
                                     <div>
                                         <h5 className="font-semibold text-gray-900">Licenciatura</h5>
                                         <p className="text-sm">UNAM - FES IZTACALA</p>
+                                        <p className="text-xs text-gray-500">Céd. Prof: 12832654</p>
                                     </div>
                                     <div>
                                         <h5 className="font-semibold text-gray-900">Especialidad</h5>
-                                        <p className="text-sm">UNAM hospital Juárez de México</p>
+                                        <p className="text-sm">UNAM Hospital Juárez de México</p>
+                                        <p className="text-xs text-gray-500">Céd. Esp: 10814161</p>
                                     </div>
                                 </div>
                             </div>
@@ -74,7 +76,13 @@ const About = () => {
                                     <div>
                                         <h5 className="font-semibold text-gray-900">Avalado por el Consejo</h5>
                                         <p className="text-sm">
-                                            Miembro activo SLARD (sociedad latinoamericana de artroscopia, reconstrucción articular y trauma deportivo)
+                                            Avalado por el consejo mexicano de ortopedia y traumatología 15/6243/22
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <h5 className="font-semibold text-gray-900">Miembro Activo</h5>
+                                        <p className="text-sm">
+                                            SLARD (Sociedad Latinoamericana de Artroscopia, Reconstrucción Articular y Trauma Deportivo)
                                         </p>
                                     </div>
                                 </div>

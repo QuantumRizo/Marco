@@ -7,7 +7,7 @@ const Reviews = () => {
             verified: true,
             text: "El trato siempre ha sido amable, en cada consulta me explica de forma detallada el avance de mi operación.",
             date: "22 de octubre de 2025",
-            location: "Hospital Star Medica Luna Parc / Consultorio 801",
+            location: "Hospital Star Médica Luna Parc / Consultorio 801",
             rating: 5,
         },
         {
@@ -15,7 +15,7 @@ const Reviews = () => {
             verified: true,
             text: "Valoración, cirugía y seguimiento. Trato amable y atento.",
             date: "22 de octubre de 2025",
-            location: "Hospital Star Medica Luna Parc / Consultorio 801",
+            location: "Hospital Star Médica Luna Parc / Consultorio 801",
             detail: "Visitas sucesivas Ortopedia",
             rating: 5,
         },
