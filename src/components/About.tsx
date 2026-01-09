@@ -56,12 +56,12 @@ const About = () => {
                                     <div>
                                         <h5 className="font-semibold text-gray-900">Licenciatura</h5>
                                         <p className="text-sm">UNAM - FES IZTACALA</p>
-                                        <p className="text-xs text-gray-500">Céd. Prof: 12832654</p>
+                                        <p className="text-xs text-gray-500">Céd. Prof: 10814161</p>
                                     </div>
                                     <div>
                                         <h5 className="font-semibold text-gray-900">Especialidad</h5>
                                         <p className="text-sm">UNAM Hospital Juárez de México</p>
-                                        <p className="text-xs text-gray-500">Céd. Esp: 10814161</p>
+                                        <p className="text-xs text-gray-500">Céd. Esp: 12832654</p>
                                     </div>
                                 </div>
                             </div>
