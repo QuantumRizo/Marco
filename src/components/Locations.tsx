@@ -26,7 +26,7 @@ const Locations = () => {
             name: "Star Médica Luna Parc",
             mapQuery: "Star+Medica+Luna+Parc",
             phones: [
-                { number: "+525558646464", display: "(55) 5864 6464" },
+                { number: "+525558646464", display: "(55) 5864 6464 Extensión 2830" },
                 { number: "+525537117674", display: "55 3711 7674" }
             ],
             website: "https://www.starmedica.com/",

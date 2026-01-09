@@ -97,8 +97,8 @@ export const useAppointments = () => {
                     .insert([{
                         name: patientData.name,
                         email: patientData.email,
-                        phone: patientData.phone,
-                        notes: patientData.notes
+                        phone: patientData.phone
+                        // notes: patientData.notes  <-- REMOVED: Do not initialize Doctor notes with Patient booking notes
                     }])
                     .select()
                     .single();
@@ -195,6 +195,98 @@ export const useAppointments = () => {
         return appointments.filter(a => a.hospitalId === hospitalId);
     };
 
+    const deleteAppointment = async (appointmentId: string) => {
+        try {
+            console.log("deleteAppointment: Deleting", appointmentId);
+            const { error } = await supabase
+                .from('appointments')
+                .delete()
+                .eq('id', appointmentId);
+
+            if (error) throw error;
+            await fetchData();
+        } catch (error) {
+            console.error('Error deleting appointment:', error);
+            throw error;
+        }
+    };
+
+    const deletePatient = async (patientId: string) => {
+        try {
+            console.log("deletePatient: Deleting patient", patientId);
+            // 1. Delete all appointments first (handled by cascade usually, but manual here for safety)
+            const { error: apptError } = await supabase
+                .from('appointments')
+                .delete()
+                .eq('patient_id', patientId);
+
+            if (apptError) throw apptError;
+
+            // 2. Delete patient
+            const { error: patientError } = await supabase
+                .from('patients')
+                .delete()
+                .eq('id', patientId);
+
+            if (patientError) throw patientError;
+
+            await fetchData();
+        } catch (error) {
+            console.error('Error deleting patient:', error);
+            throw error;
+        }
+    };
+
+    const blockSlot = async (hospitalId: string, date: string, time: string) => {
+        try {
+            // Check if patient "System Block" exists, if not create it
+            let blockPatientId;
+            const { data: existingBlockPatient } = await supabase
+                .from('patients')
+                .select('id')
+                .eq('email', 'system@block.com')
+                .maybeSingle();
+
+            if (existingBlockPatient) {
+                blockPatientId = existingBlockPatient.id;
+            } else {
+                const { data: newBlockPatient, error: createError } = await supabase
+                    .from('patients')
+                    .insert([{
+                        name: 'BLOQUEO DE HORARIO',
+                        email: 'system@block.com',
+                        phone: '0000000000',
+                        notes: 'Usuario sistema para bloqueos'
+                    }])
+                    .select()
+                    .single();
+
+                if (createError) throw createError;
+                blockPatientId = newBlockPatient.id;
+            }
+
+            const isoDateTime = `${date}T${time}:00`;
+
+            const { error } = await supabase
+                .from('appointments')
+                .insert([{
+                    patient_id: blockPatientId,
+                    hospital_id: hospitalId,
+                    reason: 'specific-service',
+                    status: 'blocked',
+                    date: isoDateTime,
+                    notes: 'Horario Bloqueado Manualmente'
+                }]);
+
+            if (error) throw error;
+            await fetchData();
+
+        } catch (error) {
+            console.error('Error blocking slot:', error);
+            throw error;
+        }
+    };
+
     return {
         appointments,
         patients,
@@ -204,6 +296,9 @@ export const useAppointments = () => {
         hospitals: HOSPITALS,
         services: SERVICES,
         updatePatient,
+        deleteAppointment,
+        deletePatient,
+        blockSlot,
         loading
     };
 };
