@@ -29,7 +29,7 @@ const Locations = () => {
     ];
 
     return (
-        <section className="bg-[#1c334a] py-20 px-4 md:px-6">
+        <section id="locations" className="bg-[#1c334a] py-20 px-4 md:px-6">
             <div className="container mx-auto">
 
                 <div className="text-center mb-16 space-y-4">

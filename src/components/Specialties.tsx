@@ -2,7 +2,7 @@ import { Activity, Bone, Move } from "lucide-react";
 
 const Specialties = () => {
     return (
-        <section className="bg-[#1c334a] py-20 px-4 md:px-6 text-white text-center">
+        <section id="specialties" className="bg-[#1c334a] py-20 px-4 md:px-6 text-white text-center">
             <div className="container mx-auto">
 
                 <div className="max-w-2xl mx-auto mb-16 space-y-4">

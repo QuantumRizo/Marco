@@ -16,9 +16,10 @@ const Navbar = () => {
 
     const navLinks = [
         { name: "Inicio", href: "#hero" },
-        { name: "Especialidades", href: "#services" },
         { name: "Sobre Mí", href: "#about" },
-        { name: "Ubicación", href: "#contact" },
+        { name: "Especialidades", href: "#specialties" },
+        { name: "Testimonios", href: "#reviews" },
+        { name: "Ubicación", href: "#locations" },
     ];
 
     return (

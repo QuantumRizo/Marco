@@ -31,7 +31,7 @@ const Reviews = () => {
     ];
 
     return (
-        <section className="py-20 bg-white">
+        <section id="reviews" className="py-20 bg-white">
             <div className="container mx-auto px-4 md:px-6">
 
                 <div className="text-center mb-16 space-y-4">
