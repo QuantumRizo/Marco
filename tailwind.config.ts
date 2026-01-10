@@ -79,6 +79,10 @@ const config = {
                     "0%, 100%": { transform: "translateY(0)" },
                     "50%": { transform: "translateY(-10px)" },
                 },
+                scroll: {
+                    "0%": { transform: "translateX(0)" },
+                    "100%": { transform: "translateX(-50%)" },
+                },
             },
             animation: {
                 "accordion-down": "accordion-down 0.2s ease-out",
@@ -86,6 +90,7 @@ const config = {
                 "fade-in": "fade-in 0.8s ease-out",
                 "slide-up": "slide-up 0.8s ease-out forwards",
                 float: "float 6s ease-in-out infinite",
+                scroll: "scroll 40s linear infinite",
             },
             fontFamily: {
                 sans: ["Outfit", "Inter", "sans-serif"],

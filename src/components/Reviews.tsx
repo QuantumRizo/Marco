@@ -51,49 +51,51 @@ const Reviews = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {reviews.map((review, index) => (
-                        <div key={index} className="bg-gray-50 rounded-2xl p-8 relative hover:shadow-lg transition-shadow duration-300 border border-gray-100 flex flex-col h-full">
-                            <Quote className="absolute top-6 right-6 w-8 h-8 text-[#94c021]/20 rotate-180" />
+                <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+                    <div className="flex w-max animate-scroll hover:[animation-play-state:paused] gap-8">
+                        {[...reviews, ...reviews, ...reviews].map((review, index) => (
+                            <div key={index} className="w-[300px] md:w-[400px] bg-gray-50 rounded-2xl p-8 relative hover:shadow-lg transition-shadow duration-300 border border-gray-100 flex flex-col h-full shrink-0">
+                                <Quote className="absolute top-6 right-6 w-8 h-8 text-[#94c021]/20 rotate-180" />
 
-                            <div className="flex flex-col h-full">
-                                {/* Header */}
-                                <div className="mb-4">
-                                    <h4 className="font-bold text-gray-900 text-lg">{review.name}</h4>
-                                    {review.verified && (
-                                        <div className="flex items-center gap-1.5 mt-1 text-green-600">
-                                            <CheckCircle className="w-4 h-4" />
-                                            <span className="text-xs font-medium">Número de teléfono verificado</span>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Stars */}
-                                <div className="flex gap-1 mb-4 text-yellow-400">
-                                    {[...Array(review.rating)].map((_, i) => (
-                                        <Star key={i} className="w-4 h-4 fill-current" />
-                                    ))}
-                                </div>
-
-                                {/* Content */}
-                                <p className="text-gray-600 leading-relaxed mb-6 flex-grow">
-                                    "{review.text}"
-                                </p>
-
-                                {/* Footer */}
-                                <div className="pt-6 border-t border-gray-200 mt-auto space-y-2">
-                                    <div className="flex items-start gap-2 text-xs text-gray-500">
-                                        <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
-                                        <span>{review.location}</span>
+                                <div className="flex flex-col h-full">
+                                    {/* Header */}
+                                    <div className="mb-4">
+                                        <h4 className="font-bold text-gray-900 text-lg">{review.name}</h4>
+                                        {review.verified && (
+                                            <div className="flex items-center gap-1.5 mt-1 text-green-600">
+                                                <CheckCircle className="w-4 h-4" />
+                                                <span className="text-xs font-medium">Número de teléfono verificado</span>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="flex justify-between items-center text-xs text-gray-400">
-                                        <span>{review.date}</span>
-                                        {review.detail && <span>• {review.detail}</span>}
+
+                                    {/* Stars */}
+                                    <div className="flex gap-1 mb-4 text-yellow-400">
+                                        {[...Array(review.rating)].map((_, i) => (
+                                            <Star key={i} className="w-4 h-4 fill-current" />
+                                        ))}
+                                    </div>
+
+                                    {/* Content */}
+                                    <p className="text-gray-600 leading-relaxed mb-6 flex-grow">
+                                        "{review.text}"
+                                    </p>
+
+                                    {/* Footer */}
+                                    <div className="pt-6 border-t border-gray-200 mt-auto space-y-2">
+                                        <div className="flex items-start gap-2 text-xs text-gray-500">
+                                            <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
+                                            <span>{review.location}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs text-gray-400">
+                                            <span>{review.date}</span>
+                                            {review.detail && <span>• {review.detail}</span>}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>
