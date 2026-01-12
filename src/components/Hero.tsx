@@ -1,6 +1,8 @@
 import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 const Hero = () => {
+    const location = useLocation();
     return (
         <section id="hero" className="relative pt-32 pb-0 overflow-hidden bg-white">
             {/* Abstract Background Elements */}
@@ -37,14 +39,19 @@ const Hero = () => {
 
                         {/* CTA Buttons */}
                         <div className="flex flex-col sm:flex-row gap-4 mt-2">
-                            <button className="inline-flex items-center justify-center px-8 py-3.5 text-base font-semibold text-white transition-all duration-200 bg-primary rounded-full shadow-lg shadow-primary/25 hover:bg-primary/90 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] group">
-                                Agendar Consulta
-                                <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-200 group-hover:translate-x-1" />
-                            </button>
+                            <Link to="/book">
+                                <button className="inline-flex items-center justify-center px-8 py-3.5 text-base font-semibold text-white transition-all duration-200 bg-primary rounded-full shadow-lg shadow-primary/25 hover:bg-primary/90 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] group">
+                                    Agendar Consulta
+                                    <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-200 group-hover:translate-x-1" />
+                                </button>
+                            </Link>
 
-                            <button className="inline-flex items-center justify-center px-8 py-3.5 text-base font-semibold text-gray-700 transition-all duration-200 bg-white border border-gray-200 rounded-full hover:bg-gray-50 hover:text-primary active:scale-[0.98]">
+                            <a
+                                href={location.pathname === "/" ? "#specialties" : "/#specialties"}
+                                className="inline-flex items-center justify-center px-8 py-3.5 text-base font-semibold text-gray-700 transition-all duration-200 bg-white border border-gray-200 rounded-full hover:bg-gray-50 hover:text-primary active:scale-[0.98]"
+                            >
                                 Conocer Servicios
-                            </button>
+                            </a>
                         </div>
 
                         {/* Trust Indicators */}
