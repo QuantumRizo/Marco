@@ -34,7 +34,7 @@ export interface Appointment {
     reason: AppointmentReason;
     date: string; // ISO String
     time: string; // "10:30"
-    status: 'confirmed' | 'pending' | 'cancelled' | 'completed' | 'blocked';
+    status: 'confirmed' | 'pending' | 'cancelled' | 'completed' | 'blocked' | 'waiting_room' | 'in_progress' | 'finished';
     notes?: string;
 }
 

@@ -227,7 +227,6 @@ export const useAppointments = () => {
                 .from('patients')
                 .delete()
                 .eq('id', patientId);
-
             if (patientError) throw patientError;
 
             await fetchData();
@@ -287,6 +286,63 @@ export const useAppointments = () => {
         }
     };
 
+    const updateAppointmentStatus = async (appointmentId: string, status: string) => {
+        try {
+            const { error } = await supabase
+                .from('appointments')
+                .update({ status })
+                .eq('id', appointmentId);
+
+            if (error) throw error;
+            await fetchData();
+        } catch (error) {
+            console.error('Error updating status:', error);
+            throw error;
+        }
+    };
+
+    const updateAppointment = async (appointmentId: string, updates: Partial<Appointment>) => {
+        try {
+            // If date/time is updated, we need to construct the ISO string
+            let updatePayload: any = { ...updates };
+
+            if (updates.date && updates.time) {
+                updatePayload.date = `${updates.date}T${updates.time}:00`;
+                delete updatePayload.time; // Remove UI-only time field
+            } else if (updates.date) {
+                // Changing date but keeping time? Need to fetch original time.
+                // For simplicity, we assume generic update passes both if datetime changes.
+                // Or we can just trust the caller passes valid 'date' column string if they mapped it back.
+                // But our mapper splits them. 
+                // Let's assume the caller will pass 'date' as YYYY-MM-DD and 'time' as HH:MM if they want to reschedule.
+                // Actually the DB column is 'date' (timestamp).
+            }
+
+            // Adjust payload for DB
+            // updates comes with camelCase, we might need snake_case if using exact row update
+            // But our 'saveAppointment' does manual mapping. 
+            // Let's handle just status/notes/date/time for simplified logic
+            const dbUpdates: any = {};
+            if (updates.status) dbUpdates.status = updates.status;
+            if (updates.notes) dbUpdates.notes = updates.notes;
+            if (updates.serviceId) dbUpdates.service_id = updates.serviceId;
+            if (updates.date && updates.time) {
+                dbUpdates.date = `${updates.date}T${updates.time}:00`;
+            }
+
+            const { error } = await supabase
+                .from('appointments')
+                .update(dbUpdates)
+                .eq('id', appointmentId);
+
+            if (error) throw error;
+            await fetchData();
+        } catch (error) {
+            console.error('Error updating appointment:', error);
+            throw error;
+        }
+    };
+
     return {
         appointments,
         patients,
@@ -298,6 +354,8 @@ export const useAppointments = () => {
         updatePatient,
         deleteAppointment,
         deletePatient,
+        updateAppointmentStatus,
+        updateAppointment,
         blockSlot,
         loading
     };

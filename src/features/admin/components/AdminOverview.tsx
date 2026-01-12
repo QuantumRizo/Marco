@@ -7,9 +7,10 @@ import { es } from 'date-fns/locale';
 
 interface AdminOverviewProps {
     selectedHospitalId: string;
+    onOpenAppointmentDialog: () => void;
 }
 
-export const AdminOverview = ({ selectedHospitalId }: AdminOverviewProps) => {
+export const AdminOverview = ({ selectedHospitalId, onOpenAppointmentDialog }: AdminOverviewProps) => {
     const { appointments, patients, hospitals } = useAppointments();
 
     const hospitalName = hospitals.find(h => h.id === selectedHospitalId)?.name || 'Hospital';
@@ -35,10 +36,16 @@ export const AdminOverview = ({ selectedHospitalId }: AdminOverviewProps) => {
         a.status !== 'cancelled'
     );
 
+    const totalActivePatients = new Set(
+        appointments
+            .filter(a => a.status !== 'cancelled')
+            .map(a => a.patientId)
+    ).size;
+
     return (
         <div className="space-y-6 animate-fade-in">
             {/* KPI Grid */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">
@@ -50,6 +57,20 @@ export const AdminOverview = ({ selectedHospitalId }: AdminOverviewProps) => {
                         <div className="text-2xl font-bold">{todayAppointments.length}</div>
                         <p className="text-xs text-muted-foreground">
                             {todayAppointments.length === 0 ? "Sin citas programadas" : "Pacientes agendados"}
+                        </p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                            Total Pacientes
+                        </CardTitle>
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-primary">{totalActivePatients}</div>
+                        <p className="text-xs text-muted-foreground">
+                            Activos Globalmente
                         </p>
                     </CardContent>
                 </Card>
@@ -89,7 +110,7 @@ export const AdminOverview = ({ selectedHospitalId }: AdminOverviewProps) => {
                         <AlertCircle className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent className="flex gap-2">
-                        <Button size="sm" className="w-full bg-[#1c334a]" onClick={() => window.location.href = '/book'}>
+                        <Button size="sm" className="w-full bg-[#1c334a]" onClick={onOpenAppointmentDialog}>
                             Nueva Cita
                         </Button>
                     </CardContent>
