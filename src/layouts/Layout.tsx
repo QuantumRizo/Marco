@@ -79,7 +79,7 @@ const Layout = ({ children }: LayoutProps) => {
                             <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-8 text-xs text-gray-500 font-medium">
                                 <span>Responsable sanitario: Dr. Marco Alvarado Sanchez</span>
                                 <span className="hidden md:inline text-gray-300">|</span>
-                                <span>Aviso de Publicidad COFEPRIS: folio pendiente</span>
+                                <span>Aviso de Publicidad COFEPRIS: 2609012002A00007 </span>
                             </div>
                         </div>
 
