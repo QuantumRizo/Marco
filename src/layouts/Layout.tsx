@@ -84,8 +84,18 @@ const Layout = ({ children }: LayoutProps) => {
                         </div>
 
                         {/* Copyright */}
-                        <div className="text-xs text-gray-300">
-                            © {new Date().getFullYear()} Dr. Marco Alvarado. Todos los derechos reservados.
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="text-xs ">
+                                © {new Date().getFullYear()} Dr. Marco Alvarado. Todos los derechos reservados.
+                            </div>
+                            <a
+                                href="https://www.davidrizo.dev"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs underline hover:text-gray-400 transition-colors"
+                            >
+                                Sitio hecho por davidrizo.dev
+                            </a>
                         </div>
                     </div>
                 </div>
