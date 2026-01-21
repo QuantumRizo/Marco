@@ -4,16 +4,16 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { HOSPITAL_SCHEDULES } from "@/features/appointments/types";
 
 interface AdminAppointmentDialogProps {
     selectedHospitalId: string;
-    services: any[];
     onSave: (appointmentData: any, patientData: any) => Promise<boolean>;
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
 
-export const AdminAppointmentDialog = ({ selectedHospitalId, services, onSave, open, onOpenChange }: AdminAppointmentDialogProps) => {
+export const AdminAppointmentDialog = ({ selectedHospitalId, onSave, open, onOpenChange }: AdminAppointmentDialogProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Form State
@@ -26,6 +26,7 @@ export const AdminAppointmentDialog = ({ selectedHospitalId, services, onSave, o
 
     const [appointment, setAppointment] = useState({
         serviceId: '',
+        serviceName: '', // Added for specific service description
         date: '',
         time: '',
         reason: ''
@@ -41,8 +42,13 @@ export const AdminAppointmentDialog = ({ selectedHospitalId, services, onSave, o
 
     const handleSubmit = async () => {
         // Basic Validation
-        if (!patient.name || !patient.email || !patient.phone || !appointment.date || !appointment.time) {
+        if (!patient.name || !patient.email || !patient.phone || !appointment.date || !appointment.time || !appointment.reason) {
             alert("Por favor complete todos los campos obligatorios");
+            return;
+        }
+
+        if (appointment.reason === 'specific-service' && !appointment.serviceName) {
+            alert("Por favor describa el servicio específico");
             return;
         }
 
@@ -51,10 +57,11 @@ export const AdminAppointmentDialog = ({ selectedHospitalId, services, onSave, o
             await onSave(
                 {
                     hospitalId: selectedHospitalId,
-                    serviceId: appointment.serviceId,
+                    serviceId: null, // We are not using strict service IDs anymore in this flow
+                    serviceName: appointment.reason === 'specific-service' ? appointment.serviceName : undefined,
                     date: appointment.date,
                     time: appointment.time,
-                    reason: appointment.reason || 'Agendado por Admin',
+                    reason: appointment.reason,
                     notes: patient.notes // Using patient notes as appointment/patient notes
                 },
                 patient
@@ -62,7 +69,7 @@ export const AdminAppointmentDialog = ({ selectedHospitalId, services, onSave, o
             onOpenChange(false);
             // Reset form
             setPatient({ name: '', email: '', phone: '', notes: '' });
-            setAppointment({ serviceId: '', date: '', time: '', reason: '' });
+            setAppointment({ serviceId: '', serviceName: '', date: '', time: '', reason: '' });
         } catch (error) {
             console.error("Error scheduling:", error);
             alert("Error al agendar la cita. Verifique los datos.");
@@ -121,19 +128,33 @@ export const AdminAppointmentDialog = ({ selectedHospitalId, services, onSave, o
                     <div className="space-y-4 border-t pt-4">
                         <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Detalles de la Cita</h3>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="admin-service">Servicio</Label>
-                            <select
-                                id="admin-service"
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                value={appointment.serviceId}
-                                onChange={(e) => handleAppointmentChange('serviceId', e.target.value)}
-                            >
-                                <option value="">Seleccionar servicio...</option>
-                                {services.map((s) => (
-                                    <option key={s.id} value={s.id}>{s.name}</option>
-                                ))}
-                            </select>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="admin-reason">Motivo de la Cita</Label>
+                                <select
+                                    id="admin-reason"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    value={appointment.reason}
+                                    onChange={(e) => handleAppointmentChange('reason', e.target.value)}
+                                >
+                                    <option value="">Seleccionar motivo...</option>
+                                    <option value="first-visit">Primera Vez</option>
+                                    <option value="follow-up">Seguimiento</option>
+                                    <option value="specific-service">Servicio Específico</option>
+                                </select>
+                            </div>
+
+                            {appointment.reason === 'specific-service' && (
+                                <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                    <Label htmlFor="admin-service-desc">Descripción del Servicio</Label>
+                                    <Input
+                                        id="admin-service-desc"
+                                        value={appointment.serviceName || ''}
+                                        onChange={(e) => handleAppointmentChange('serviceName', e.target.value)}
+                                        placeholder="Ej: Consulta de tal, Revisión..."
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -143,7 +164,27 @@ export const AdminAppointmentDialog = ({ selectedHospitalId, services, onSave, o
                                     id="admin-date"
                                     type="date"
                                     value={appointment.date}
-                                    onChange={(e) => handleAppointmentChange('date', e.target.value)}
+                                    onChange={(e) => {
+                                        const dateVal = e.target.value;
+                                        if (dateVal) {
+                                            const [year, month, day] = dateVal.split('-').map(Number);
+                                            const dateObj = new Date(year, month - 1, day);
+                                            const dayOfWeek = dateObj.getDay();
+                                            const allowedDays = HOSPITAL_SCHEDULES[selectedHospitalId]?.allowedDays;
+
+                                            if (allowedDays && !allowedDays.includes(dayOfWeek)) {
+                                                alert(`El hospital seleccionado no abre este día. Días permitidos: ${allowedDays.map(d => ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][d]).join(', ')
+                                                    }`);
+                                                // Don't set the date or let them override? 
+                                                // For admin, maybe just warn? The prompt says "hazlo funcionar asi y intuitivamente" 
+                                                // "Dale a entender al usuario... y tambien en el panel de admin cuando se agende hazlo funcionar asi"
+                                                // I should probably enforce it.
+                                                handleAppointmentChange('date', '');
+                                                return;
+                                            }
+                                        }
+                                        handleAppointmentChange('date', dateVal);
+                                    }}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -155,15 +196,12 @@ export const AdminAppointmentDialog = ({ selectedHospitalId, services, onSave, o
                                     onChange={(e) => handleAppointmentChange('time', e.target.value)}
                                 >
                                     <option value="">Seleccionar hora...</option>
-                                    {Array.from({ length: 19 }).map((_, i) => { // 9:00 to 18:00 every 30 mins
+                                    {Array.from({ length: 13 }).map((_, i) => { // 9:00 to 15:00 every 30 mins
                                         const startHour = 9;
                                         const totalMinutes = i * 30;
                                         const hour = startHour + Math.floor(totalMinutes / 60);
                                         const minutes = totalMinutes % 60;
                                         const time = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-
-                                        // Just showing up to 19:00 maybe? Let's stick strictly to what AdminDashboard.tsx had or slightly better.
-                                        // AdminDashboard had intervals too.
                                         return <option key={time} value={time}>{time}</option>;
                                     })}
                                 </select>

@@ -16,6 +16,22 @@ export interface Service {
     price?: number;
 }
 
+export interface MedicalHistory {
+    allergies: string; // Text field
+    conditions: string; // Text field
+    surgeries: string; // Text field
+    medications: string; // Text field
+    familyHistory: string; // Text field
+    bloodType?: string;
+}
+
+export interface SoapNote {
+    subjective: string; // Síntomas descritos por paciente
+    objective: string;  // Signos vitales, exploración física
+    analysis: string;   // Diagnóstico
+    plan: string;       // Tratamiento, estudios
+}
+
 export interface Patient {
     id: string;
     name: string;
@@ -23,6 +39,7 @@ export interface Patient {
     phone: string;
     notes: string; // Internal notes for the doctor
     history: string[]; // IDs of past appointments
+    medicalHistory?: MedicalHistory; // JSONB from DB
 }
 
 export interface Appointment {
@@ -36,7 +53,30 @@ export interface Appointment {
     time: string; // "10:30"
     status: 'confirmed' | 'pending' | 'cancelled' | 'completed' | 'blocked' | 'waiting_room' | 'in_progress' | 'finished';
     notes?: string;
+    clinicalData?: SoapNote; // JSONB from DB
 }
+
+export interface HospitalSchedule {
+    allowedDays: number[]; // 0 = Sunday, 1 = Monday, etc.
+}
+
+export const APPOINTMENT_CONFIG = {
+    START_HOUR: 9, // 9:00 AM
+    END_HOUR: 15,  // 3:00 PM
+    INTERVAL_MINUTES: 30
+};
+
+export const HOSPITAL_SCHEDULES: Record<string, HospitalSchedule> = {
+    'hosp-angeles': {
+        allowedDays: [3, 6] // Wednesday (3), Saturday (6)
+    },
+    'hosp-star-lomas': {
+        allowedDays: [2, 5] // Tuesday (2), Friday (5)
+    },
+    'hosp-star-luna': {
+        allowedDays: [1, 4] // Monday (1), Thursday (4)
+    }
+};
 
 export const HOSPITALS: Hospital[] = [
     {

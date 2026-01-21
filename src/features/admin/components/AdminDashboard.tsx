@@ -14,7 +14,7 @@ import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
 export const AdminDashboard = () => {
-    const { hospitals, blockSlot, saveAppointment, services } = useAppointments();
+    const { hospitals, blockSlot, saveAppointment } = useAppointments();
     const [selectedHospitalId, setSelectedHospitalId] = useState(hospitals[0]?.id);
     const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
     const [isAppointmentDialogOpen, setIsAppointmentDialogOpen] = useState(false);
@@ -178,7 +178,6 @@ export const AdminDashboard = () => {
 
                                 <AdminAppointmentDialog
                                     selectedHospitalId={selectedHospitalId}
-                                    services={services}
                                     onSave={saveAppointment}
                                     open={isAppointmentDialogOpen}
                                     onOpenChange={setIsAppointmentDialogOpen}

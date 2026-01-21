@@ -16,7 +16,7 @@ const Locations = () => {
             name: "Star Médica Lomas Verdes",
             mapQuery: "Star+Medica+Lomas+Verdes",
             phones: [
-                { number: "+525557544253", display: "55 5754 4253" },
+                { number: "+525588039157", display: "55 8803 9157" },
                 { number: "+525560004312", display: "55 6000 4312" }
             ],
             website: "https://www.starmedica.com/",

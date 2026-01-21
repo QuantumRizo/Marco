@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Appointment, Patient } from '../types';
-import { HOSPITALS, SERVICES } from '../types';
+import { HOSPITALS, SERVICES, HOSPITAL_SCHEDULES } from '../types';
 
 export const useAppointments = () => {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -29,7 +29,8 @@ export const useAppointments = () => {
                 time: new Date(a.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }), // Extract HH:MM
                 status: a.status,
                 serviceName: a.service_name, // Optional if we add this to DB or join
-                notes: a.notes // Fetching the notes where we saved the custom description
+                notes: a.notes, // Fetching the notes where we saved the custom description
+                clinicalData: a.clinical_data // JSONB from DB
             }));
 
             // Fetch Patients
@@ -39,8 +40,13 @@ export const useAppointments = () => {
 
             if (patientsError) throw patientsError;
 
+            const mappedPatients = (patientsData || []).map((p: any) => ({
+                ...p,
+                medicalHistory: p.medical_history // JSONB from DB
+            }));
+
             setAppointments(mappedAppointments);
-            setPatients(patientsData as Patient[] || []);
+            setPatients(mappedPatients as Patient[] || []);
 
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -148,7 +154,10 @@ export const useAppointments = () => {
         try {
             const { error } = await supabase
                 .from('patients')
-                .update({ notes: patient.notes })
+                .update({
+                    notes: patient.notes,
+                    medical_history: patient.medicalHistory
+                })
                 .eq('id', patient.id);
 
             if (error) throw error;
@@ -159,10 +168,35 @@ export const useAppointments = () => {
     };
 
     const getAvailableSlots = (date: string, hospitalId: string) => {
-        // Generate slots every 90 minutes starting from 9:00 AM to 6:00 PM
+        // Find hospital schedule
+        const schedule = HOSPITAL_SCHEDULES[hospitalId];
+
+        // Parse date to check day of week
+        // date string is YYYY-MM-DD
+        // We append T00:00:00 to ensure local time parsing or use split
+        const [year, month, day] = date.split('-').map(Number);
+        const dateObj = new Date(year, month - 1, day);
+        const dayOfWeek = dateObj.getDay(); // 0-6
+
+        // If day not allowed for this hospital, return empty
+        if (!schedule || !schedule.allowedDays.includes(dayOfWeek)) {
+            return [];
+        }
+
+        // Generate slots every 30 minutes starting from 9:00 AM to 3:00 PM (15:00)
+        // using APPOINTMENT_CONFIG constants would be better but for now hardcoding to match plan/speed unless I import them
+        // Let's import them.
+        // Wait, I can't easily import inside a replace_content without adding the import at the top.
+        // I will use magic numbers here matching the plan: 9 to 15, step 30.
+        // Or better, I'll update the imports first in a separate move? 
+        // No, I can stick to the plan values since I just defined them. 
+        // Actually, to be clean, I should add the import to the file first. 
+        // But for this block, I will implement the logic directly.
+
         const slots: string[] = [];
         const startHour = 9;
-        const endHour = 18;
+        const endHour = 15; // 3 PM
+        const interval = 30;
 
         // Existing appointments for this day and hospital from STATE
         const existingForDay = appointments.filter(a =>
@@ -174,6 +208,10 @@ export const useAppointments = () => {
         let currentTime = new Date(`2000-01-01T${startHour.toString().padStart(2, '0')}:00:00`);
         const endTime = new Date(`2000-01-01T${endHour.toString().padStart(2, '0')}:00:00`);
 
+        // We want to include endHour? usually endHour is exclusive for start time of appointment
+        // If they work 9-3, last appt is probably 2:30 or 14:30.
+        // If endHour is 15 (3pm), loop should go while < endTime
+
         while (currentTime < endTime) {
             const timeString = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 
@@ -184,8 +222,8 @@ export const useAppointments = () => {
                 slots.push(timeString);
             }
 
-            // Add 90 minutes
-            currentTime.setMinutes(currentTime.getMinutes() + 90);
+            // Add 30 minutes
+            currentTime.setMinutes(currentTime.getMinutes() + interval);
         }
 
         return slots;
@@ -326,6 +364,7 @@ export const useAppointments = () => {
             if (updates.status) dbUpdates.status = updates.status;
             if (updates.notes) dbUpdates.notes = updates.notes;
             if (updates.serviceId) dbUpdates.service_id = updates.serviceId;
+            if (updates.clinicalData) dbUpdates.clinical_data = updates.clinicalData;
             if (updates.date && updates.time) {
                 dbUpdates.date = `${updates.date}T${updates.time}:00`;
             }

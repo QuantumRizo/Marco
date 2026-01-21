@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useAppointments } from '../hooks/useAppointments';
 import type { AppointmentReason } from '../types';
+import { HOSPITAL_SCHEDULES } from '../types';
 import { StepHospital } from './StepHospital';
 import { StepService } from './StepService';
 import { StepDateTime } from './StepDateTime';
@@ -179,6 +180,7 @@ export const BookingWizard = () => {
                         onSelectTime={setSelectedTime}
                         onNext={handleNext}
                         onBack={handleBack}
+                        allowedDays={selectedHospitalId ? HOSPITAL_SCHEDULES[selectedHospitalId]?.allowedDays : []}
                     />
                 )}
 

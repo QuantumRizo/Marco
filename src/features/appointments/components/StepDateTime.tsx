@@ -13,6 +13,7 @@ interface StepDateTimeProps {
     onSelectTime: (time: string) => void;
     onNext: () => void;
     onBack: () => void;
+    allowedDays?: number[]; // Array of allowed days (0-6)
 }
 
 export const StepDateTime = ({
@@ -22,7 +23,8 @@ export const StepDateTime = ({
     onSelectDate,
     onSelectTime,
     onNext,
-    onBack
+    onBack,
+    allowedDays
 }: StepDateTimeProps) => {
     return (
         <div className="space-y-8 animate-fade-in">
@@ -38,7 +40,11 @@ export const StepDateTime = ({
                             mode="single"
                             selected={date}
                             onSelect={onSelectDate}
-                            disabled={(date: Date) => date < new Date() || date < new Date("1900-01-01")}
+                            disabled={(date: Date) => {
+                                const isPast = date < new Date() || date < new Date("1900-01-01");
+                                const isNotAllowedDay = allowedDays ? !allowedDays.includes(date.getDay()) : false;
+                                return isPast || isNotAllowedDay;
+                            }}
                             initialFocus
                             className="rounded-md"
                             locale={es}
@@ -57,8 +63,10 @@ export const StepDateTime = ({
                             Selecciona una fecha primero
                         </div>
                     ) : availableSlots.length === 0 ? (
-                        <div className="h-48 flex items-center justify-center text-gray-500 text-sm border rounded-lg bg-gray-50">
-                            No hay horarios disponibles para este día
+                        <div className="h-48 flex items-center justify-center text-gray-500 text-sm border rounded-lg bg-gray-50 p-4 text-center">
+                            {allowedDays && !allowedDays.includes(date.getDay())
+                                ? "Este hospital no abre este día. Por favor selecciona otro día."
+                                : "No hay horarios disponibles para este día"}
                         </div>
                     ) : (
                         <ScrollArea className="h-[300px] pr-4">
