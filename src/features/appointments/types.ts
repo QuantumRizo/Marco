@@ -17,12 +17,50 @@ export interface Service {
 }
 
 export interface MedicalHistory {
-    allergies: string; // Text field
-    conditions: string; // Text field
-    surgeries: string; // Text field
-    medications: string; // Text field
-    familyHistory: string; // Text field
+    // Datos Generales
+    sex?: 'Masculino' | 'Femenino';
+    dateOfBirth?: string; // YYYY-MM-DD
+    maritalStatus?: 'Soltero' | 'Casado' | 'Divorciado' | 'Viudo' | 'Unión Libre';
+    spouseName?: string;
+    homePhone?: string;
+    officePhone?: string;
+    occupation?: string;
+    address?: {
+        street: string;
+        number: string;
+        neighborhood: string; // Colonia
+        municipality?: string; // Delegación o Municipio
+        city: string;
+        state: string;
+        zipCode: string;
+    };
+    insurance?: boolean;
+    insuranceCompany?: string;
+    sports?: string;
+    recommendedBy?: string;
+
+    // Existing fields moved to General Data section in UI, keeping same keys
     bloodType?: string;
+    allergies: string;
+    conditions: string; // Enfermedades
+    medications: string;
+    surgeries: string; // Not explicitly requested in "Datos Generales" list but good to keep, maybe in Clinical History? User said "Enfermedades q padece... toma medicamentos... recomendado por: y ya". 
+    // Wait, "Enfermedades q padece" is conditions. 
+    // I will keep surgeries available.
+    familyHistory: string; // Antecedentes Hereditarios - might map to "Antecedentes personales patológicos" or similar, but user asked for specific new sections in Clinical History.
+    // User asked for "Antecedentes personales no patológicos", "Antecedentes personales patológicos", etc.
+    // I will add the new Clinical History fields.
+
+    // Historia Clínica (New Sections)
+    nonPathologicalHistory?: string; // Antecedentes personales no patológicos
+    pathologicalHistory?: string; // Antecedentes personales patológicos
+    gynecoObstetricHistory?: string; // Antecedentes gineco obstetricos
+    perinatalHistory?: string; // Antecedentes perinatales
+    currentCondition?: string; // Padecimiento actual
+    physicalExploration?: string; // Exploración física
+    labStudies?: string; // Estudios de laboratorio y gabinete
+    treatment?: string; // Tratamiento
+    prognosis?: string; // Pronóstico
 }
 
 export interface SoapNote {

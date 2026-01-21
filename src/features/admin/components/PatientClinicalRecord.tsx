@@ -99,10 +99,9 @@ export const PatientClinicalRecord = ({
             <div className="flex-1 overflow-hidden bg-white">
                 <Tabs defaultValue="notes" className="h-full flex flex-col">
                     <div className="px-6 pt-4 border-b bg-white">
-                        <TabsList className="grid w-full grid-cols-4 max-w-[650px]">
+                        <TabsList className="grid w-full grid-cols-3 max-w-[650px]">
                             <TabsTrigger value="history">Historia Clínica</TabsTrigger>
                             <TabsTrigger value="notes">Notas de Evolución</TabsTrigger>
-                            <TabsTrigger value="info">Datos Generales</TabsTrigger>
                             <TabsTrigger value="files">Archivos</TabsTrigger>
                         </TabsList>
                     </div>
@@ -199,30 +198,6 @@ export const PatientClinicalRecord = ({
                                     </div>
                                 )}
                             </div>
-                        </TabsContent>
-
-                        <TabsContent value="info" className="mt-0">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Información de Contacto</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid gap-4 max-w-md">
-                                        <div className="bg-gray-50 p-4 rounded-lg">
-                                            <label className="text-xs font-bold text-gray-500 uppercase">Nombre</label>
-                                            <div className="text-lg font-medium">{patient.name}</div>
-                                        </div>
-                                        <div className="bg-gray-50 p-4 rounded-lg">
-                                            <label className="text-xs font-bold text-gray-500 uppercase">Email</label>
-                                            <div className="text-lg font-medium">{patient.email}</div>
-                                        </div>
-                                        <div className="bg-gray-50 p-4 rounded-lg">
-                                            <label className="text-xs font-bold text-gray-500 uppercase">Teléfono</label>
-                                            <div className="text-lg font-medium">{patient.phone}</div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
                         </TabsContent>
 
                         <TabsContent value="files" className="mt-0">
