@@ -178,6 +178,7 @@ export const AdminDashboard = () => {
 
                                 <AdminAppointmentDialog
                                     selectedHospitalId={selectedHospitalId}
+                                    hospitals={hospitals}
                                     onSave={saveAppointment}
                                     open={isAppointmentDialogOpen}
                                     onOpenChange={setIsAppointmentDialogOpen}
