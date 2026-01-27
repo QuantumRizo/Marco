@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Instagram, Facebook, Mail } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const Navbar = () => {
@@ -105,11 +105,11 @@ const Navbar = () => {
                             <Mail className="w-5 h-5 text-white/90 group-hover:text-white group-hover:scale-110 transition-transform" />
                         </a>
                     </div>
-                    <Link to="/book">
+                    <a href="#locations">
                         <button className="bg-white text-primary px-6 py-2.5 rounded-full text-sm font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
                             Agendar Cita
                         </button>
-                    </Link>
+                    </a>
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -137,11 +137,11 @@ const Navbar = () => {
                                 {link.name}
                             </a>
                         ))}
-                        <Link to="/book" onClick={() => setIsMobileMenuOpen(false)}>
+                        <a href="#locations" onClick={() => setIsMobileMenuOpen(false)}>
                             <button className="w-full bg-primary text-white px-6 py-3 rounded-lg text-sm font-semibold shadow-md mt-2">
                                 Agendar Consulta
                             </button>
-                        </Link>
+                        </a>
 
                         <div className="flex items-center justify-center gap-4 mt-2 pt-4 border-t border-gray-100">
                             <a

@@ -1,37 +1,41 @@
 import { useAppointments } from '../../appointments/hooks/useAppointments';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Calendar, TrendingUp, AlertCircle, Clock } from 'lucide-react';
+import { Users, Calendar, TrendingUp, AlertCircle, Clock, MapPin } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { format, isToday, parseISO, isThisWeek, isAfter } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface AdminOverviewProps {
-    selectedHospitalId: string;
     onOpenAppointmentDialog: () => void;
+    onOpenAddPatientDialog: () => void;
 }
 
-export const AdminOverview = ({ selectedHospitalId, onOpenAppointmentDialog }: AdminOverviewProps) => {
+export const AdminOverview = ({ onOpenAppointmentDialog, onOpenAddPatientDialog }: AdminOverviewProps) => {
     const { appointments, patients, hospitals } = useAppointments();
 
-    const hospitalName = hospitals.find(h => h.id === selectedHospitalId)?.name || 'Hospital';
+    // ... rest of code ...
+
+    // (This replace is large if I include everything, let me narrow it down)
+    // Actually, I can just replace the Interface and the Component start, 
+    // AND then a second chunk for the button? No, replace_file_content is single chunk.
+    // multi_replace is better.
+
+    // Metric calculations for Global View
 
     // Metrics
+    // Metrics (Global Aggregation)
     const todayAppointments = appointments.filter(a =>
-        a.hospitalId === selectedHospitalId &&
         isToday(parseISO(a.date)) &&
         a.status !== 'cancelled'
     );
 
-    const activePatients = new Set(
-        appointments
-            .filter(a => a.hospitalId === selectedHospitalId && a.status !== 'cancelled')
-            .map(a => a.patientId)
+    const activeHospitalsCount = new Set(
+        appointments.filter(a => a.status !== 'cancelled').map(a => a.hospitalId)
     ).size;
 
     // const newPatientsThisWeek = ... // Removed unused variable
 
     const weekAppointments = appointments.filter(a =>
-        a.hospitalId === selectedHospitalId &&
         isThisWeek(parseISO(a.date)) &&
         a.status !== 'cancelled'
     );
@@ -77,14 +81,14 @@ export const AdminOverview = ({ selectedHospitalId, onOpenAppointmentDialog }: A
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">
-                            Pacientes Activos
+                            Sedes Activas
                         </CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{activePatients}</div>
+                        <div className="text-2xl font-bold">{activeHospitalsCount}</div>
                         <p className="text-xs text-muted-foreground">
-                            En {hospitalName}
+                            Con actividad registrada
                         </p>
                     </CardContent>
                 </Card>
@@ -109,9 +113,12 @@ export const AdminOverview = ({ selectedHospitalId, onOpenAppointmentDialog }: A
                         </CardTitle>
                         <AlertCircle className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
-                    <CardContent className="flex gap-2">
+                    <CardContent className="flex flex-col gap-2">
                         <Button size="sm" className="w-full bg-[#1c334a]" onClick={onOpenAppointmentDialog}>
                             Nueva Cita
+                        </Button>
+                        <Button size="sm" className="w-full bg-[#1c334a]" onClick={onOpenAddPatientDialog}>
+                            Nuevo Paciente
                         </Button>
                     </CardContent>
                 </Card>
@@ -144,18 +151,18 @@ export const AdminOverview = ({ selectedHospitalId, onOpenAppointmentDialog }: A
                                                 </div>
                                                 <div>
                                                     <h4 className="font-semibold text-gray-900">{patient?.name || 'Paciente Desconocido'}</h4>
+                                                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                        <MapPin className="w-3 h-3" />
+                                                        {hospitals.find(h => h.id === apt.hospitalId)?.name}
+                                                    </p>
                                                     <p className="text-sm text-gray-500">
                                                         {apt.reason === 'specific-service' ? apt.serviceName : apt.reason}
                                                     </p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${apt.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                                                    apt.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                                        'bg-gray-100 text-gray-700'
-                                                    }`}>
-                                                    {apt.status === 'confirmed' ? 'Confirmada' :
-                                                        apt.status === 'pending' ? 'Pendiente' : apt.status}
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${apt.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                                                    {apt.status === 'cancelled' ? 'Cancelada' : 'Confirmada'}
                                                 </span>
                                             </div>
                                         </div>
@@ -190,7 +197,7 @@ export const AdminOverview = ({ selectedHospitalId, onOpenAppointmentDialog }: A
                                             <div>
                                                 <p className="font-medium text-sm text-gray-800">{patient?.name}</p>
                                                 <p className="text-xs text-gray-500">
-                                                    {format(parseISO(apt.date), "dd MMM", { locale: es })} • {apt.time}
+                                                    {format(parseISO(apt.date), "dd MMM", { locale: es })} • {apt.time} • {hospitals.find(h => h.id === apt.hospitalId)?.name}
                                                 </p>
                                             </div>
                                         </div>
@@ -203,6 +210,41 @@ export const AdminOverview = ({ selectedHospitalId, onOpenAppointmentDialog }: A
                         </div>
                     </CardContent>
                 </Card>
+            </div>
+
+            {/* Hospital Activity Breakdown */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {hospitals.map(hospital => {
+                    const hospitalAppts = appointments.filter(a => a.hospitalId === hospital.id && a.status !== 'cancelled');
+                    const hospitalPatients = new Set(hospitalAppts.map(a => a.patientId)).size;
+                    const todayHospitalAppts = hospitalAppts.filter(a => isToday(parseISO(a.date))).length;
+
+                    return (
+                        <Card key={hospital.id} className="border-l-4 border-l-[#1c334a]">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-base font-bold text-[#1c334a] flex items-center justify-between">
+                                    {hospital.name}
+                                    <MapPin className="w-4 h-4 text-gray-400" />
+                                </CardTitle>
+                                <CardDescription className="text-xs">
+                                    {hospital.address || 'Ubicación registrada'}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-2 gap-4 mt-2">
+                                    <div>
+                                        <span className="text-2xl font-bold block">{todayHospitalAppts}</span>
+                                        <span className="text-xs text-muted-foreground">Citas Hoy</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-2xl font-bold block">{hospitalPatients}</span>
+                                        <span className="text-xs text-muted-foreground">Pacientes Totales</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    );
+                })}
             </div>
         </div>
     );

@@ -8,14 +8,14 @@ import { HOSPITAL_SCHEDULES, type Hospital } from "@/features/appointments/types
 import { ArrowLeft, Building2 } from "lucide-react";
 
 interface AdminAppointmentDialogProps {
-    selectedHospitalId: string; // Used as default or context if needed
     hospitals: Hospital[];
     onSave: (appointmentData: any, patientData: any) => Promise<boolean>;
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    initialPatientData?: { name: string, email: string, phone: string, notes?: string } | null;
 }
 
-export const AdminAppointmentDialog = ({ selectedHospitalId: _selectedHospitalId, hospitals, onSave, open, onOpenChange }: AdminAppointmentDialogProps) => {
+export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, initialPatientData }: AdminAppointmentDialogProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Controls the flow: if null, show selection screen. If set, show form.
@@ -25,8 +25,27 @@ export const AdminAppointmentDialog = ({ selectedHospitalId: _selectedHospitalId
     useEffect(() => {
         if (open) {
             setBookingHospitalId(null); // Always ask "Where?" on open
+            // If we have initial data, we might want to auto-select hospital if provided, but for now just prefill data
+            if (initialPatientData) {
+                setPatient({
+                    name: initialPatientData.name,
+                    email: initialPatientData.email,
+                    emailError: '',
+                    phone: initialPatientData.phone,
+                    notes: initialPatientData.notes || ''
+                });
+            } else {
+                // Reset to empty if no initial data
+                setPatient({
+                    name: '',
+                    email: '',
+                    emailError: '',
+                    phone: '',
+                    notes: ''
+                });
+            }
         }
-    }, [open]);
+    }, [open, initialPatientData]);
 
     // Form State
     const [patient, setPatient] = useState({

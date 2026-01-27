@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAppointments } from '../../appointments/hooks/useAppointments';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Clock, User, Calendar, Edit2, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, User, Calendar, Edit2, Check, Building2 } from 'lucide-react';
 import {
     format,
     startOfMonth,
@@ -23,8 +23,8 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from '@/components/ui/label';
 import { Input } from "@/components/ui/input";
 
+// No props needed for Global View
 interface AdminCalendarProps {
-    selectedHospitalId: string;
 }
 
 interface Appointment {
@@ -38,8 +38,8 @@ interface Appointment {
     notes?: string;
 }
 
-export const AdminCalendar = ({ selectedHospitalId }: AdminCalendarProps) => {
-    const { appointments, patients, updateAppointmentStatus, updateAppointment, getAvailableSlots } = useAppointments();
+export const AdminCalendar = (_props: AdminCalendarProps) => {
+    const { appointments, patients, hospitals, updateAppointmentStatus, updateAppointment, getAvailableSlots } = useAppointments();
     const [currentDate, setCurrentDate] = useState(new Date());
 
     // Edit Mode State
@@ -65,7 +65,6 @@ export const AdminCalendar = ({ selectedHospitalId }: AdminCalendarProps) => {
     // Appointments for selected hospital
     const getDayAppointments = (day: Date) => {
         return appointments.filter(a =>
-            a.hospitalId === selectedHospitalId &&
             isSameDay(parseISO(a.date), day) &&
             a.status !== 'cancelled'
         ).sort((a, b) => a.time.localeCompare(b.time));
@@ -110,23 +109,18 @@ export const AdminCalendar = ({ selectedHospitalId }: AdminCalendarProps) => {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'confirmed': return 'bg-green-100 text-green-800 border-green-500';
-            case 'waiting_room': return 'bg-yellow-100 text-yellow-800 border-yellow-500';
-            case 'in_progress': return 'bg-blue-100 text-blue-800 border-blue-500';
-            case 'finished': return 'bg-gray-100 text-gray-800 border-gray-500';
+            case 'cancelled': return 'bg-red-100 text-red-800 border-red-500';
             case 'blocked': return 'bg-gray-100 text-gray-600 border-gray-500';
-            default: return 'bg-blue-50 text-blue-700 border-blue-400';
+            default: return 'bg-green-100 text-green-800 border-green-500'; // Default everything else to confirmed visual
         }
     };
 
     const getStatusLabel = (status: string) => {
         switch (status) {
             case 'confirmed': return 'Confirmada';
-            case 'waiting_room': return 'En Sala de Espera';
-            case 'in_progress': return 'En Consulta';
-            case 'finished': return 'Finalizada';
-            case 'blocked': return 'Bloqueado';
             case 'cancelled': return 'Cancelada';
-            default: return status;
+            case 'blocked': return 'Bloqueado';
+            default: return 'Confirmada'; // Map legacy statuses to Confirmada
         }
     };
 
@@ -206,7 +200,12 @@ export const AdminCalendar = ({ selectedHospitalId }: AdminCalendarProps) => {
                                                             `}
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
-                                                            {apt.time} - {patient?.name.split(' ')[0] || 'Cita'}
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="text-[9px] font-bold bg-[#1c334a]/10 text-[#1c334a] px-1 rounded uppercase">
+                                                                    {hospitals.find(h => h.id === apt.hospitalId)?.name.substring(0, 3)}
+                                                                </span>
+                                                                {apt.time} - {patient?.name.split(' ')[0] || 'Cita'}
+                                                            </div>
                                                         </button>
                                                     </DialogTrigger>
                                                     <DialogContent>
@@ -234,7 +233,7 @@ export const AdminCalendar = ({ selectedHospitalId }: AdminCalendarProps) => {
                                                                         onChange={(e) => setEditTime(e.target.value)}
                                                                     >
                                                                         <option value="" disabled>Seleccionar hora</option>
-                                                                        {getAvailableSlots(editDate, selectedHospitalId).map(slot => (
+                                                                        {getAvailableSlots(editDate, apt.hospitalId).map(slot => (
                                                                             <option key={slot} value={slot}>{slot}</option>
                                                                         ))}
                                                                         <option value={apt.time}>{apt.time} (Actual)</option>
@@ -259,11 +258,20 @@ export const AdminCalendar = ({ selectedHospitalId }: AdminCalendarProps) => {
                                                                         disabled={apt.status === 'blocked'}
                                                                     >
                                                                         <option value="confirmed">Confirmada</option>
-                                                                        <option value="waiting_room">En Sala de Espera</option>
-                                                                        <option value="in_progress">En Consulta</option>
-                                                                        <option value="finished">Finalizada</option>
                                                                         <option value="cancelled" className="text-red-600">Cancelar Cita</option>
                                                                     </select>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-3 bg-blue-50/50 p-2 rounded-lg border border-blue-100 mb-2">
+                                                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                                                                        <Building2 className="w-4 h-4" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <span className="text-xs text-gray-500 block">Sede</span>
+                                                                        <span className="text-sm font-semibold text-[#1c334a]">
+                                                                            {hospitals.find(h => h.id === apt.hospitalId)?.name}
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
 
                                                                 <div className="flex items-center gap-3">
@@ -383,8 +391,11 @@ export const AdminCalendar = ({ selectedHospitalId }: AdminCalendarProps) => {
                                                                 </div>
 
                                                                 <div className="flex-1 min-w-0">
-                                                                    <div className="font-semibold text-gray-900 truncate">
+                                                                    <div className="font-semibold text-gray-900 truncate flex items-center gap-2">
                                                                         {patient?.name}
+                                                                        <Badge variant="outline" className="text-[9px] h-4 px-1 bg-blue-50 text-blue-700 border-blue-100">
+                                                                            {hospitals.find(h => h.id === apt.hospitalId)?.name}
+                                                                        </Badge>
                                                                     </div>
                                                                     <div className="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
                                                                         <span className="truncate max-w-[150px]">
@@ -424,7 +435,7 @@ export const AdminCalendar = ({ selectedHospitalId }: AdminCalendarProps) => {
                                                                             onChange={(e) => setEditTime(e.target.value)}
                                                                         >
                                                                             <option value="" disabled>Seleccionar hora</option>
-                                                                            {getAvailableSlots(editDate, selectedHospitalId).map(slot => (
+                                                                            {getAvailableSlots(editDate, apt.hospitalId).map(slot => (
                                                                                 <option key={slot} value={slot}>{slot}</option>
                                                                             ))}
                                                                             <option value={apt.time}>{apt.time} (Actual)</option>
@@ -454,6 +465,18 @@ export const AdminCalendar = ({ selectedHospitalId }: AdminCalendarProps) => {
                                                                             <option value="finished">Finalizada</option>
                                                                             <option value="cancelled">Cancelar</option>
                                                                         </select>
+                                                                    </div>
+
+                                                                    <div className="flex items-center gap-3 bg-blue-50/50 p-2 rounded-lg border border-blue-100 mb-2">
+                                                                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                                                                            <Building2 className="w-4 h-4" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <span className="text-xs text-gray-500 block">Sede</span>
+                                                                            <span className="text-sm font-semibold text-[#1c334a]">
+                                                                                {hospitals.find(h => h.id === apt.hospitalId)?.name}
+                                                                            </span>
+                                                                        </div>
                                                                     </div>
 
                                                                     <div className="flex items-center gap-3">

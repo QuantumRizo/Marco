@@ -2,22 +2,26 @@ import { useState } from 'react';
 import { useAppointments } from '../../appointments/hooks/useAppointments';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Calendar as CalendarIcon, LayoutDashboard, Users, Lock, ChevronDown, CalendarPlus, LogOut, Menu, X } from 'lucide-react';
+import { Calendar as CalendarIcon, LayoutDashboard, Users, Lock, CalendarPlus, LogOut, Menu, X, UserPlus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { AdminOverview } from './AdminOverview';
 import { AdminCalendar } from './AdminCalendar';
 import { PatientDirectory } from './PatientDirectory';
+import { AddPatientDialog } from './AddPatientDialog';
 import { AdminAppointmentDialog } from './AdminAppointmentDialog';
 import { GlobalSearch } from './GlobalSearch';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
 export const AdminDashboard = () => {
-    const { hospitals, blockSlot, saveAppointment } = useAppointments();
-    const [selectedHospitalId, setSelectedHospitalId] = useState(hospitals[0]?.id);
+    const { hospitals, blockSlot, saveAppointment, addPatient } = useAppointments();
+    // Local state for Blocking Dialog since there is no global hospital anymore
+    const [blockHospitalId, setBlockHospitalId] = useState(hospitals[0]?.id || '');
+
     const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
     const [isAppointmentDialogOpen, setIsAppointmentDialogOpen] = useState(false);
+    const [isAddPatientDialogOpen, setIsAddPatientDialogOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -26,11 +30,18 @@ export const AdminDashboard = () => {
     const [blockTime, setBlockTime] = useState('');
     const [isBlocking, setIsBlocking] = useState(false);
 
+    const [bookingPatientData, setBookingPatientData] = useState<{ name: string, email: string, phone: string, notes?: string } | null>(null);
+
     const handleBlockSlot = async () => {
         if (!blockDate || !blockTime) return;
         setIsBlocking(true);
         try {
-            await blockSlot(selectedHospitalId, blockDate, blockTime);
+            if (!blockHospitalId) {
+                alert("Seleccione un hospital");
+                setIsBlocking(false);
+                return;
+            }
+            await blockSlot(blockHospitalId, blockDate, blockTime);
             setBlockDate('');
             setBlockTime('');
             setIsBlockDialogOpen(false);
@@ -88,22 +99,6 @@ export const AdminDashboard = () => {
 
                             {/* Controls - Hidden on Mobile unless menu open, Visible on Desktop */}
                             <div className={`${isMobileMenuOpen ? 'flex' : 'hidden'} lg:flex flex-col lg:flex-row items-stretch lg:items-center gap-3 w-full lg:w-auto order-2 border-t lg:border-t-0 border-white/10 pt-4 lg:pt-0`}>
-                                <div className="relative w-full lg:w-auto">
-                                    <select
-                                        className="w-full lg:w-64 pl-9 pr-8 py-2 bg-white/10 border border-white/20 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/30 appearance-none cursor-pointer hover:bg-white/20 transition-colors"
-                                        value={selectedHospitalId}
-                                        onChange={(e) => setSelectedHospitalId(e.target.value)}
-                                    >
-                                        {hospitals.map(h => (
-                                            <option key={h.id} value={h.id} className="text-gray-900">
-                                                {h.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70 pointer-events-none" />
-                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70 pointer-events-none" />
-                                </div>
-
                                 <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 w-full lg:w-auto">
                                     <Dialog open={isBlockDialogOpen} onOpenChange={setIsBlockDialogOpen}>
                                         <DialogTrigger asChild>
@@ -120,6 +115,18 @@ export const AdminDashboard = () => {
                                                 </DialogTitle>
                                             </DialogHeader>
                                             <div className="grid gap-4 py-4">
+                                                <div className="grid gap-2">
+                                                    <label className="text-sm font-medium">Hospital</label>
+                                                    <select
+                                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                                        value={blockHospitalId}
+                                                        onChange={(e) => setBlockHospitalId(e.target.value)}
+                                                    >
+                                                        {hospitals.map(h => (
+                                                            <option key={h.id} value={h.id}>{h.name}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
                                                 <div className="grid gap-2">
                                                     <label className="text-sm font-medium">Fecha</label>
                                                     <Input
@@ -149,7 +156,7 @@ export const AdminDashboard = () => {
                                                         })}
                                                     </select>
                                                 </div>
-                                                <Button onClick={handleBlockSlot} disabled={isBlocking || !blockDate || !blockTime} className="bg-red-600 hover:bg-red-700">
+                                                <Button onClick={handleBlockSlot} disabled={isBlocking || !blockDate || !blockTime || !blockHospitalId} className="bg-red-600 hover:bg-red-700">
                                                     {isBlocking ? "Bloqueando..." : "Confirmar Bloqueo"}
                                                 </Button>
                                             </div>
@@ -167,6 +174,15 @@ export const AdminDashboard = () => {
 
                                     <Button
                                         size="sm"
+                                        className="bg-primary hover:bg-primary/90 text-white shadow-lg gap-2 justify-start lg:justify-center"
+                                        onClick={() => setIsAddPatientDialogOpen(true)}
+                                    >
+                                        <UserPlus className="w-4 h-4" />
+                                        <span>Nuevo Paciente</span>
+                                    </Button>
+
+                                    <Button
+                                        size="sm"
                                         variant="ghost"
                                         className="text-white hover:bg-white/20 gap-2 justify-start lg:justify-center"
                                         onClick={handleLogout}
@@ -177,11 +193,24 @@ export const AdminDashboard = () => {
                                 </div>
 
                                 <AdminAppointmentDialog
-                                    selectedHospitalId={selectedHospitalId}
                                     hospitals={hospitals}
                                     onSave={saveAppointment}
                                     open={isAppointmentDialogOpen}
-                                    onOpenChange={setIsAppointmentDialogOpen}
+                                    onOpenChange={(val) => {
+                                        setIsAppointmentDialogOpen(val);
+                                        if (!val) setBookingPatientData(null); // Clear data on close
+                                    }}
+                                    initialPatientData={bookingPatientData}
+                                />
+
+                                <AddPatientDialog
+                                    open={isAddPatientDialogOpen}
+                                    onOpenChange={setIsAddPatientDialogOpen}
+                                    onSave={addPatient}
+                                    onBookAppointment={(data) => {
+                                        setBookingPatientData(data);
+                                        setIsAppointmentDialogOpen(true);
+                                    }}
                                 />
                             </div>
                         </div>
@@ -206,17 +235,22 @@ export const AdminDashboard = () => {
 
                     <TabsContent value="overview" className="space-y-4">
                         <AdminOverview
-                            selectedHospitalId={selectedHospitalId}
                             onOpenAppointmentDialog={() => setIsAppointmentDialogOpen(true)}
+                            onOpenAddPatientDialog={() => setIsAddPatientDialogOpen(true)}
                         />
                     </TabsContent>
 
                     <TabsContent value="calendar">
-                        <AdminCalendar selectedHospitalId={selectedHospitalId} />
+                        <AdminCalendar />
                     </TabsContent>
 
                     <TabsContent value="patients">
-                        <PatientDirectory selectedHospitalId={selectedHospitalId} />
+                        <PatientDirectory
+                            onBookAppointment={(data) => {
+                                setBookingPatientData(data);
+                                setIsAppointmentDialogOpen(true);
+                            }}
+                        />
                     </TabsContent>
                 </Tabs>
             </div>

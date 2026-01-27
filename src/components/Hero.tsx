@@ -1,5 +1,5 @@
 import { ArrowRight, CheckCircle2 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 const Hero = () => {
     const location = useLocation();
@@ -39,12 +39,12 @@ const Hero = () => {
 
                         {/* CTA Buttons */}
                         <div className="flex flex-col sm:flex-row gap-4 mt-2">
-                            <Link to="/book">
+                            <a href="#locations">
                                 <button className="inline-flex items-center justify-center px-8 py-3.5 text-base font-semibold text-white transition-all duration-200 bg-primary rounded-full shadow-lg shadow-primary/25 hover:bg-primary/90 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] group">
                                     Agendar Consulta
                                     <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-200 group-hover:translate-x-1" />
                                 </button>
-                            </Link>
+                            </a>
 
                             <a
                                 href={location.pathname === "/" ? "#specialties" : "/#specialties"}

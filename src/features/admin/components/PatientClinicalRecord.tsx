@@ -3,6 +3,7 @@ import type { Patient, Appointment } from '../../appointments/types';
 import { MedicalHistoryEditor } from './MedicalHistoryEditor';
 import { PatientFiles } from './PatientFiles';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import { es } from 'date-fns/locale';
 interface PatientClinicalRecordProps {
     patient: Patient;
     appointments: Appointment[];
+    hospitals: any[]; // Using any[] to avoid circular dependency or import type if available
     onUpdatePatient: (patient: Patient) => Promise<void>;
     onUpdateAppointment: (id: string, updates: Partial<Appointment>) => Promise<void>;
 }
@@ -22,6 +24,7 @@ interface PatientClinicalRecordProps {
 export const PatientClinicalRecord = ({
     patient: initialPatient,
     appointments,
+    hospitals,
     onUpdatePatient,
     onUpdateAppointment
 }: PatientClinicalRecordProps) => {
@@ -99,9 +102,10 @@ export const PatientClinicalRecord = ({
             <div className="flex-1 overflow-hidden bg-white">
                 <Tabs defaultValue="notes" className="h-full flex flex-col">
                     <div className="px-6 pt-4 border-b bg-white">
-                        <TabsList className="grid w-full grid-cols-3 max-w-[650px]">
-                            <TabsTrigger value="history">Historia Clínica</TabsTrigger>
-                            <TabsTrigger value="notes">Notas de Evolución</TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 max-w-full md:max-w-[650px] gap-2 md:gap-0 h-auto md:h-10">
+                            <TabsTrigger value="history">Historia</TabsTrigger>
+                            <TabsTrigger value="appointments">Citas</TabsTrigger>
+                            <TabsTrigger value="notes">Notas</TabsTrigger>
                             <TabsTrigger value="files">Archivos</TabsTrigger>
                         </TabsList>
                     </div>
@@ -120,6 +124,62 @@ export const PatientClinicalRecord = ({
                                 </CardHeader>
                                 <CardContent>
                                     <MedicalHistoryEditor patient={patient} onSave={handleSaveHistory} />
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+
+
+                        <TabsContent value="appointments" className="mt-0">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                        <Calendar className="w-5 h-5 text-blue-600" />
+                                        Historial de Citas
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Lista completa de citas programadas y pasadas.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    {patientAppointments.length === 0 ? (
+                                        <div className="text-center py-8 text-gray-500">
+                                            No hay citas registradas.
+                                        </div>
+                                    ) : (
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow className="bg-gray-50/50">
+                                                    <TableHead>Fecha</TableHead>
+                                                    <TableHead>Hora</TableHead>
+                                                    <TableHead>Sede</TableHead>
+                                                    <TableHead>Motivo</TableHead>
+                                                    <TableHead>Estado</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {patientAppointments.map((appt) => (
+                                                    <TableRow key={appt.id}>
+                                                        <TableCell className="font-medium">
+                                                            {format(parseISO(appt.date), 'dd MMM yyyy', { locale: es })}
+                                                        </TableCell>
+                                                        <TableCell>{appt.time}</TableCell>
+                                                        <TableCell>
+                                                            {hospitals?.find(h => h.id === appt.hospitalId)?.name || '-'}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {appt.reason === 'specific-service' ? appt.serviceName : appt.reason}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge variant={appt.status === 'cancelled' ? 'destructive' : 'default'} className={`text-xs ${appt.status !== 'cancelled' ? 'bg-green-600 hover:bg-green-700' : ''}`}>
+                                                                {appt.status === 'cancelled' ? 'Cancelada' : 'Confirmada'}
+                                                            </Badge>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    )}
                                 </CardContent>
                             </Card>
                         </TabsContent>
@@ -153,9 +213,15 @@ export const PatientClinicalRecord = ({
                                                                 <span className="text-sm text-gray-600 flex items-center gap-1">
                                                                     <Clock className="w-3 h-3" /> {appt.time}
                                                                 </span>
+                                                                {/* Hospital Badge */}
+                                                                {hospitals && (
+                                                                    <Badge variant="outline" className="ml-2 text-xs border-blue-200 text-blue-700 bg-blue-50">
+                                                                        {hospitals.find(h => h.id === appt.hospitalId)?.name || 'Hospital'}
+                                                                    </Badge>
+                                                                )}
                                                             </div>
-                                                            <Badge variant={appt.status === 'completed' ? 'default' : 'secondary'}>
-                                                                {appt.status}
+                                                            <Badge variant={appt.status === 'cancelled' ? 'destructive' : 'default'} className={appt.status !== 'cancelled' ? 'bg-green-600 hover:bg-green-700' : ''}>
+                                                                {appt.status === 'cancelled' ? 'Cancelada' : 'Confirmada'}
                                                             </Badge>
                                                         </div>
                                                     </CardHeader>
@@ -207,5 +273,6 @@ export const PatientClinicalRecord = ({
                 </Tabs>
             </div>
         </div>
+
     );
 };

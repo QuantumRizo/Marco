@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index";
-import Book from "./pages/Book";
+// import Book from "./pages/Book";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 
@@ -47,7 +47,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/book" element={<Book />} />
+          {/* <Route path="/book" element={<Book />} /> Disabled per user request */}
           <Route path="/login" element={<Login />} />
           <Route
             path="/admin"

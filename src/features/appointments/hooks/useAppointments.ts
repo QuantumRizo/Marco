@@ -382,6 +382,48 @@ export const useAppointments = () => {
         }
     };
 
+    const addPatient = async (patientData: { name: string, email: string, phone: string, notes?: string }) => {
+        try {
+            setLoading(true);
+            // 1. Check if patient exists
+            const { data: existingPatient, error: searchError } = await supabase
+                .from('patients')
+                .select('id')
+                .eq('email', patientData.email)
+                .maybeSingle();
+
+            if (searchError) throw searchError;
+
+            if (existingPatient) {
+                // If exists, inform the user (or we could just return the ID, but usually we want to know if it was new)
+                throw new Error("El paciente ya está registrado con este correo.");
+            }
+
+            // 2. Create new patient
+            const { data: newPatient, error: createError } = await supabase
+                .from('patients')
+                .insert([{
+                    name: patientData.name,
+                    email: patientData.email,
+                    phone: patientData.phone,
+                    notes: patientData.notes || ''
+                }])
+                .select()
+                .single();
+
+            if (createError) throw createError;
+
+            await fetchData(); // Refresh list
+            return newPatient;
+
+        } catch (error) {
+            console.error("Error adding patient:", error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
         appointments,
         patients,
@@ -396,6 +438,7 @@ export const useAppointments = () => {
         updateAppointmentStatus,
         updateAppointment,
         blockSlot,
+        addPatient,
         loading
     };
 };
