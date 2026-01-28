@@ -3,13 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { UserPlus, CalendarPlus, CheckCircle } from "lucide-react";
 
 interface AddPatientDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onSave: (patientData: { name: string, email: string, phone: string, notes: string }) => Promise<any>;
+    onSave: (patientData: { name: string, email: string, phone: string }) => Promise<any>;
     onBookAppointment: (patientData: any) => void;
 }
 
@@ -21,8 +20,7 @@ export const AddPatientDialog = ({ open, onOpenChange, onSave, onBookAppointment
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        phone: '',
-        notes: ''
+        phone: ''
     });
 
     const [createdPatient, setCreatedPatient] = useState<any>(null);
@@ -51,7 +49,7 @@ export const AddPatientDialog = ({ open, onOpenChange, onSave, onBookAppointment
     };
 
     const handleReset = () => {
-        setFormData({ name: '', email: '', phone: '', notes: '' });
+        setFormData({ name: '', email: '', phone: '' });
         setStep('form');
         setCreatedPatient(null);
     };
@@ -110,15 +108,6 @@ export const AddPatientDialog = ({ open, onOpenChange, onSave, onBookAppointment
                                     onChange={(e) => handleChange('phone', e.target.value)}
                                 />
                             </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="new-notes">Notas Iniciales</Label>
-                            <Textarea
-                                id="new-notes"
-                                placeholder="Antecedentes o notas importantes..."
-                                value={formData.notes}
-                                onChange={(e) => handleChange('notes', e.target.value)}
-                            />
                         </div>
 
                         <div className="flex justify-end gap-3 pt-4 border-t">

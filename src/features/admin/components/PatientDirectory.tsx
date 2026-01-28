@@ -20,7 +20,7 @@ interface PatientDirectoryProps {
 }
 
 export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) => {
-    const { hospitals, appointments, patients, deletePatient, updatePatient, updateAppointment, addPatient, loading } = useAppointments();
+    const { hospitals, appointments, patients, deletePatient, updatePatient, addPatient, loading } = useAppointments();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -317,7 +317,6 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
                                                                         hospitals={hospitals}
 
                                                                         onUpdatePatient={updatePatient}
-                                                                        onUpdateAppointment={updateAppointment}
                                                                     />
                                                                 )}
                                                             </DialogContent>

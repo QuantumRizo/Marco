@@ -18,23 +18,22 @@ interface PatientClinicalRecordProps {
     appointments: Appointment[];
     hospitals: any[]; // Using any[] to avoid circular dependency or import type if available
     onUpdatePatient: (patient: Patient) => Promise<void>;
-    onUpdateAppointment: (id: string, updates: Partial<Appointment>) => Promise<void>;
 }
 
 export const PatientClinicalRecord = ({
     patient: initialPatient,
     appointments,
     hospitals,
-    onUpdatePatient,
-    onUpdateAppointment
+    onUpdatePatient
 }: PatientClinicalRecordProps) => {
     // REMOVED useAppointments hook to avoid re-fetching data on every open
     const [patient, setPatient] = useState<Patient>(initialPatient);
-    const [editingNotes, setEditingNotes] = useState<Record<string, string>>({});
+    const [generalNotes, setGeneralNotes] = useState<string>(initialPatient.notes || '');
 
     // Refresh local state when props change
     if (initialPatient.id !== patient.id) {
         setPatient(initialPatient);
+        setGeneralNotes(initialPatient.notes || '');
     }
 
     const handleSaveHistory = async (history: any) => {
@@ -43,28 +42,15 @@ export const PatientClinicalRecord = ({
         setPatient(updated);
     };
 
-    const handleNoteChange = (apptId: string, text: string) => {
-        setEditingNotes(prev => ({ ...prev, [apptId]: text }));
-    };
-
-    const handleSaveNote = async (apptId: string) => {
-        const textToSave = editingNotes[apptId];
-        if (textToSave === undefined) return;
-
+    const handleSaveGeneralNotes = async () => {
         try {
-            await onUpdateAppointment(apptId, { notes: textToSave });
-
-            // Clear editing state on success so UI reverts to showing SAVED note (which matches textToSave)
-            setEditingNotes(prev => {
-                const newState = { ...prev };
-                delete newState[apptId];
-                return newState;
-            });
-
-            toast.success("Nota de cita guardada correctamente");
+            const updated = { ...patient, notes: generalNotes };
+            await onUpdatePatient(updated);
+            setPatient(updated);
+            toast.success("Notas guardadas correctamente");
         } catch (error) {
-            console.error("Error saving note", error);
-            toast.error("Error al guardar la nota");
+            console.error("Error saving notes", error);
+            toast.error("Error al guardar las notas");
         }
     };
 
@@ -103,7 +89,7 @@ export const PatientClinicalRecord = ({
                 <Tabs defaultValue="notes" className="h-full flex flex-col">
                     <div className="px-6 pt-4 border-b bg-white">
                         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 max-w-full md:max-w-[650px] gap-2 md:gap-0 h-auto md:h-10">
-                            <TabsTrigger value="history">Historia</TabsTrigger>
+                            <TabsTrigger value="history">Datos / Historia</TabsTrigger>
                             <TabsTrigger value="appointments">Citas</TabsTrigger>
                             <TabsTrigger value="notes">Notas</TabsTrigger>
                             <TabsTrigger value="files">Archivos</TabsTrigger>
@@ -184,86 +170,51 @@ export const PatientClinicalRecord = ({
                             </Card>
                         </TabsContent>
 
-                        <TabsContent value="notes" className="mt-0">
-                            <div className="space-y-6">
-                                <div className="text-sm text-gray-500 mb-4">
-                                    Historial de consultas y notas.
+                        <TabsContent value="notes" className="mt-0 h-full flex flex-col">
+                            <Card className="flex-1 flex flex-col shadow-sm border-t-0 rounded-t-none">
+                                <CardHeader className="pb-3">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <CardTitle className="text-lg flex items-center gap-2">
+                                                <div className="p-2 bg-yellow-100/50 rounded-lg text-yellow-700">
+                                                    <Clock className="w-5 h-5" />
+                                                </div>
+                                                Cuaderno de Notas
+                                            </CardTitle>
+                                            <CardDescription className="mt-1">
+                                                Espacio para notas generales, seguimiento y observaciones del paciente. Recuerde guardar los cambios.
+                                            </CardDescription>
+                                        </div>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="flex-1 p-0 flex flex-col relative min-h-[400px]">
+                                    <div className="absolute inset-0 p-6">
+                                        <textarea
+                                            className="w-full h-full resize-none bg-[url('https://www.transparenttextures.com/patterns/lined-paper.png')] bg-white leading-8 p-4 text-base text-gray-700 focus:outline-none focus:ring-0 border-0"
+                                            placeholder="Escriba aquí las notas clínicas del paciente..."
+                                            value={generalNotes}
+                                            onChange={(e) => setGeneralNotes(e.target.value)}
+                                            style={{
+                                                backgroundImage: 'linear-gradient(#e5e7eb 1px, transparent 1px)',
+                                                backgroundSize: '100% 32px',
+                                                lineHeight: '32px'
+                                            }}
+                                        ></textarea>
+                                    </div>
+                                </CardContent>
+                                <div className="p-4 border-t bg-gray-50 flex justify-between items-center">
+                                    <span className="text-xs text-gray-500 italic">
+                                        * Estas notas se guardan en el expediente general del paciente.
+                                    </span>
+                                    <Button
+                                        onClick={handleSaveGeneralNotes}
+                                        disabled={generalNotes === (patient.notes || '')}
+                                        className={`${generalNotes !== (patient.notes || '') ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300 text-gray-500'}`}
+                                    >
+                                        {generalNotes !== (patient.notes || '') ? 'Guardar Cambios' : 'Sin cambios'}
+                                    </Button>
                                 </div>
-
-                                {patientAppointments.length === 0 ? (
-                                    <div className="text-center py-10 text-gray-400">
-                                        No hay consultas registradas.
-                                    </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        {patientAppointments.map(appt => {
-                                            const currentNote = editingNotes[appt.id] !== undefined ? editingNotes[appt.id] : (appt.notes || '');
-                                            const hasChanges = currentNote !== (appt.notes || '');
-
-                                            return (
-                                                <Card key={appt.id} className="border-l-4 border-l-[#1c334a]">
-                                                    <CardHeader className="py-3 px-4 bg-gray-50/50">
-                                                        <div className="flex justify-between items-center">
-                                                            <div className="flex items-center gap-2">
-                                                                <Calendar className="w-4 h-4 text-gray-500" />
-                                                                <span className="font-semibold text-gray-700">
-                                                                    {format(parseISO(appt.date), 'dd MMMM yyyy', { locale: es })}
-                                                                </span>
-                                                                <span className="text-gray-400">|</span>
-                                                                <span className="text-sm text-gray-600 flex items-center gap-1">
-                                                                    <Clock className="w-3 h-3" /> {appt.time}
-                                                                </span>
-                                                                {/* Hospital Badge */}
-                                                                {hospitals && (
-                                                                    <Badge variant="outline" className="ml-2 text-xs border-blue-200 text-blue-700 bg-blue-50">
-                                                                        {hospitals.find(h => h.id === appt.hospitalId)?.name || 'Hospital'}
-                                                                    </Badge>
-                                                                )}
-                                                            </div>
-                                                            <Badge variant={appt.status === 'cancelled' ? 'destructive' : 'default'} className={appt.status !== 'cancelled' ? 'bg-green-600 hover:bg-green-700' : ''}>
-                                                                {appt.status === 'cancelled' ? 'Cancelada' : 'Confirmada'}
-                                                            </Badge>
-                                                        </div>
-                                                    </CardHeader>
-                                                    <CardContent className="py-4">
-                                                        <div className="grid md:grid-cols-2 gap-6">
-                                                            <div className="space-y-2">
-                                                                <h4 className="text-xs font-bold text-gray-500 uppercase mb-1">Motivo</h4>
-                                                                <p className="text-sm">{appt.reason === 'specific-service' ? (appt.serviceName || 'Servicio') : appt.reason}</p>
-                                                            </div>
-                                                            <div className="space-y-2">
-                                                                <h4 className="text-xs font-bold text-gray-500 uppercase mb-1 flex justify-between items-center">
-                                                                    Notas de la Cita
-                                                                    {hasChanges && (
-                                                                        <span className="text-xs text-amber-600 font-normal animate-pulse">Cambios sin guardar</span>
-                                                                    )}
-                                                                </h4>
-                                                                <textarea
-                                                                    className="w-full min-h-[80px] text-sm p-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-100 placeholder:text-gray-400 resize-none"
-                                                                    placeholder="Escriba aquí las notas de la cita..."
-                                                                    value={currentNote}
-                                                                    onChange={(e) => handleNoteChange(appt.id, e.target.value)}
-                                                                ></textarea>
-                                                                {hasChanges && (
-                                                                    <div className="flex justify-end">
-                                                                        <Button
-                                                                            size="sm"
-                                                                            onClick={() => handleSaveNote(appt.id)}
-                                                                            className="h-8 text-xs bg-green-600 hover:bg-green-700"
-                                                                        >
-                                                                            Guardar Notas
-                                                                        </Button>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </CardContent>
-                                                </Card>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </div>
+                            </Card>
                         </TabsContent>
 
                         <TabsContent value="files" className="mt-0">

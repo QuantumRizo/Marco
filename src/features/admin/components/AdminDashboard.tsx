@@ -234,10 +234,7 @@ export const AdminDashboard = () => {
                     </TabsList>
 
                     <TabsContent value="overview" className="space-y-4">
-                        <AdminOverview
-                            onOpenAppointmentDialog={() => setIsAppointmentDialogOpen(true)}
-                            onOpenAddPatientDialog={() => setIsAddPatientDialogOpen(true)}
-                        />
+                        <AdminOverview />
                     </TabsContent>
 
                     <TabsContent value="calendar">
