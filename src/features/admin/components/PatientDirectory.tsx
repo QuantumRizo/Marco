@@ -242,102 +242,184 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
                                 : "No hay pacientes registrados en el sistema."}
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow className="bg-gray-50/50">
-                                        <TableHead className="min-w-[200px]">Paciente</TableHead>
-                                        <TableHead className="hidden md:table-cell">Contacto</TableHead>
-                                        <TableHead className="text-right min-w-[150px]">Acciones</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filteredPatients.map((patient) => {
-                                        const { upcoming } = getPatientHistory(patient.id);
-                                        const nextAppt = upcoming[0];
+                        <div className="space-y-4">
+                            {/* Desktop Table View */}
+                            <div className="hidden md:block overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="bg-gray-50/50">
+                                            <TableHead className="min-w-[200px]">Paciente</TableHead>
+                                            <TableHead className="hidden md:table-cell">Contacto</TableHead>
+                                            <TableHead className="text-right min-w-[150px]">Acciones</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredPatients.map((patient) => {
+                                            const { upcoming } = getPatientHistory(patient.id);
+                                            const nextAppt = upcoming[0];
 
-                                        return (
-                                            <TableRow key={patient.id} className="group hover:bg-gray-50 transition-colors">
-                                                <TableCell>
-                                                    <div className="font-bold text-[#1c334a] text-lg">{patient.name}</div>
-                                                    {nextAppt && (
-                                                        <div className="text-xs text-green-600 flex items-center gap-1 mt-1 font-medium bg-green-50 w-fit px-2 py-0.5 rounded-full">
-                                                            <Calendar className="w-3 h-3" />
-                                                            Próxima: {format(parseISO(nextAppt.date), 'dd MMM', { locale: es })} - {nextAppt.time}
+                                            return (
+                                                <TableRow key={patient.id} className="group hover:bg-gray-50 transition-colors">
+                                                    <TableCell>
+                                                        <div className="font-bold text-[#1c334a] text-lg">{patient.name}</div>
+                                                        {nextAppt && (
+                                                            <div className="text-xs text-green-600 flex items-center gap-1 mt-1 font-medium bg-green-50 w-fit px-2 py-0.5 rounded-full">
+                                                                <Calendar className="w-3 h-3" />
+                                                                Próxima: {format(parseISO(nextAppt.date), 'dd MMM', { locale: es })} - {nextAppt.time}
+                                                            </div>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="hidden md:table-cell">
+                                                        <div className="text-sm text-gray-600 flex flex-col gap-1">
+                                                            <span className="flex items-center gap-2"><Phone className="w-3 h-3" /> {patient.phone}</span>
+                                                            <span className="flex items-center gap-2"><Mail className="w-3 h-3" /> {patient.email}</span>
                                                         </div>
-                                                    )}
-                                                    {/* Mobile Contact Info */}
-                                                    <div className="md:hidden mt-2 text-xs text-gray-500 space-y-1">
-                                                        <div className="flex items-center gap-1"><Phone className="w-3 h-3" /> {patient.phone}</div>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="hidden md:table-cell">
-                                                    <div className="text-sm text-gray-600 flex flex-col gap-1">
+                                                    </TableCell>
+
+                                                    <TableCell className="text-right">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                className="bg-[#1c334a] hover:bg-[#2a4560] text-white shadow-sm"
+                                                                onClick={() => onBookAppointment && onBookAppointment({
+                                                                    id: patient.id,
+                                                                    name: patient.name,
+                                                                    email: patient.email,
+                                                                    phone: patient.phone
+                                                                })}
+                                                                title="Agendar Cita"
+                                                            >
+                                                                <CalendarPlus className="w-4 h-4 mr-2" />
+                                                                Agendar
+                                                            </Button>
+                                                            <Dialog>
+                                                                <DialogTrigger asChild>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        className="bg-[#1c334a] hover:bg-[#2a4560] shadow-sm"
+                                                                        onClick={() => handleOpenPatient(patient)}
+                                                                    >
+                                                                        <FileText className="w-4 h-4 mr-2" />
+                                                                        Expediente
+                                                                    </Button>
+                                                                </DialogTrigger>
+                                                                <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+                                                                    <DialogHeader>
+                                                                        <DialogTitle className="text-xl">Expediente Clínico</DialogTitle>
+                                                                    </DialogHeader>
+
+                                                                    {selectedPatient && (
+                                                                        <PatientClinicalRecord
+                                                                            patient={selectedPatient}
+                                                                            appointments={appointments}
+                                                                            hospitals={hospitals}
+                                                                            onUpdatePatient={updatePatient}
+                                                                        />
+                                                                    )}
+                                                                </DialogContent>
+                                                            </Dialog>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="destructive"
+                                                                className="bg-red-500 hover:bg-red-600 text-white shadow-sm"
+                                                                onClick={(e) => handleDeletePatient(patient.id, e)}
+                                                                title="Eliminar Paciente Completo"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                    </TableBody>
+                                </Table>
+                            </div>
+
+                            {/* Mobile Card View */}
+                            <div className="md:hidden space-y-4">
+                                {filteredPatients.map((patient) => {
+                                    const { upcoming } = getPatientHistory(patient.id);
+                                    const nextAppt = upcoming[0];
+
+                                    return (
+                                        <div key={patient.id} className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 space-y-3">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <div className="font-bold text-[#1c334a] text-lg">{patient.name}</div>
+                                                    <div className="text-sm text-gray-500 flex flex-col gap-0.5 mt-1">
                                                         <span className="flex items-center gap-2"><Phone className="w-3 h-3" /> {patient.phone}</span>
                                                         <span className="flex items-center gap-2"><Mail className="w-3 h-3" /> {patient.email}</span>
                                                     </div>
-                                                </TableCell>
-
-                                                <TableCell className="text-right">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <Button
-                                                            size="sm"
-                                                            className="bg-[#1c334a] hover:bg-[#2a4560] text-white shadow-sm"
-                                                            onClick={() => onBookAppointment && onBookAppointment({
-                                                                id: patient.id,
-                                                                name: patient.name,
-                                                                email: patient.email,
-                                                                phone: patient.phone
-                                                            })}
-                                                            title="Agendar Cita"
-                                                        >
-                                                            <CalendarPlus className="w-4 h-4 mr-2" />
-                                                            Agendar
-                                                        </Button>
-                                                        <Dialog>
-                                                            <DialogTrigger asChild>
-                                                                <Button
-                                                                    size="sm"
-                                                                    className="bg-[#1c334a] hover:bg-[#2a4560] shadow-sm"
-                                                                    onClick={() => handleOpenPatient(patient)}
-                                                                >
-                                                                    <FileText className="w-4 h-4 mr-2" />
-                                                                    Ver Expediente
-                                                                </Button>
-                                                            </DialogTrigger>
-                                                            <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
-                                                                <DialogHeader>
-                                                                    <DialogTitle className="text-xl">Expediente Clínico</DialogTitle>
-                                                                </DialogHeader>
-
-                                                                {selectedPatient && (
-                                                                    <PatientClinicalRecord
-                                                                        patient={selectedPatient}
-                                                                        appointments={appointments}
-                                                                        hospitals={hospitals}
-
-                                                                        onUpdatePatient={updatePatient}
-                                                                    />
-                                                                )}
-                                                            </DialogContent>
-                                                        </Dialog>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="destructive"
-                                                            className="bg-red-500 hover:bg-red-600 text-white shadow-sm"
-                                                            onClick={(e) => handleDeletePatient(patient.id, e)}
-                                                            title="Eliminar Paciente Completo"
-                                                        >
-                                                            <Trash2 className="w-4 h-4 mr-2" /> Eliminar
-                                                        </Button>
+                                                </div>
+                                                {nextAppt && (
+                                                    <div className="text-[10px] text-green-700 bg-green-50 px-2 py-1 rounded-full font-semibold border border-green-100 text-center leading-tight">
+                                                        <div className="flex items-center justify-center gap-1 mb-0.5">
+                                                            <Calendar className="w-3 h-3" />
+                                                            PRÓXIMA
+                                                        </div>
+                                                        {format(parseISO(nextAppt.date), 'dd MMM', { locale: es })}
+                                                        <div className="font-normal">{nextAppt.time}</div>
                                                     </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })}
-                                </TableBody>
+                                                )}
+                                            </div>
 
-                            </Table>
+                                            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-50">
+                                                <Button
+                                                    size="sm"
+                                                    className="w-full bg-[#1c334a] hover:bg-[#2a4560] text-white shadow-sm h-10"
+                                                    onClick={() => onBookAppointment && onBookAppointment({
+                                                        id: patient.id,
+                                                        name: patient.name,
+                                                        email: patient.email,
+                                                        phone: patient.phone
+                                                    })}
+                                                >
+                                                    <CalendarPlus className="w-4 h-4 mr-1.5" />
+                                                    Agendar
+                                                </Button>
+
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="w-full border-[#1c334a] text-[#1c334a] hover:bg-blue-50 h-10"
+                                                            onClick={() => handleOpenPatient(patient)}
+                                                        >
+                                                            <FileText className="w-4 h-4 mr-1.5" />
+                                                            Expediente
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="w-[95%] sm:max-w-[800px] max-h-[90vh] overflow-y-auto p-4 md:p-6">
+                                                        <DialogHeader>
+                                                            <DialogTitle className="text-xl">Expediente Clínico</DialogTitle>
+                                                        </DialogHeader>
+
+                                                        {selectedPatient && (
+                                                            <PatientClinicalRecord
+                                                                patient={selectedPatient}
+                                                                appointments={appointments}
+                                                                hospitals={hospitals}
+                                                                onUpdatePatient={updatePatient}
+                                                            />
+                                                        )}
+                                                    </DialogContent>
+                                                </Dialog>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="w-full text-red-500 hover:text-red-600 hover:bg-red-50 h-8 text-xs"
+                                                onClick={(e) => handleDeletePatient(patient.id, e)}
+                                            >
+                                                <Trash2 className="w-3 h-3 mr-1.5" />
+                                                Eliminar Paciente
+                                            </Button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     )}
                 </CardContent>

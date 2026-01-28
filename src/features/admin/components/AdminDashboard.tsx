@@ -10,6 +10,7 @@ import { AdminCalendar } from './AdminCalendar';
 import { PatientDirectory } from './PatientDirectory';
 import { AddPatientDialog } from './AddPatientDialog';
 import { AdminAppointmentDialog } from './AdminAppointmentDialog';
+import { BookingTypeDialog } from './BookingTypeDialog';
 import { GlobalSearch } from './GlobalSearch';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
@@ -21,6 +22,7 @@ export const AdminDashboard = () => {
 
     const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
     const [isAppointmentDialogOpen, setIsAppointmentDialogOpen] = useState(false);
+    const [isBookingTypeDialogOpen, setIsBookingTypeDialogOpen] = useState(false);
     const [isAddPatientDialogOpen, setIsAddPatientDialogOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
@@ -166,7 +168,7 @@ export const AdminDashboard = () => {
                                     <Button
                                         size="sm"
                                         className="bg-primary hover:bg-primary/90 text-white shadow-lg gap-2 justify-start lg:justify-center"
-                                        onClick={() => setIsAppointmentDialogOpen(true)}
+                                        onClick={() => setIsBookingTypeDialogOpen(true)}
                                     >
                                         <CalendarPlus className="w-4 h-4" />
                                         <span>Agendar Cita</span>
@@ -201,6 +203,25 @@ export const AdminDashboard = () => {
                                         if (!val) setBookingPatientData(null); // Clear data on close
                                     }}
                                     initialPatientData={bookingPatientData}
+                                />
+
+                                <BookingTypeDialog
+                                    open={isBookingTypeDialogOpen}
+                                    onOpenChange={setIsBookingTypeDialogOpen}
+                                    onNewPatient={() => {
+                                        setIsBookingTypeDialogOpen(false);
+                                        setIsAddPatientDialogOpen(true);
+                                    }}
+                                    onExistingPatient={(patient) => {
+                                        setIsBookingTypeDialogOpen(false);
+                                        setBookingPatientData({
+                                            name: patient.name,
+                                            email: patient.email,
+                                            phone: patient.phone,
+                                            notes: '' // Or fetch notes if available
+                                        });
+                                        setIsAppointmentDialogOpen(true);
+                                    }}
                                 />
 
                                 <AddPatientDialog

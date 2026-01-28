@@ -86,7 +86,7 @@ export const PatientClinicalRecord = ({
 
             {/* Content Tabs */}
             <div className="flex-1 overflow-hidden bg-white">
-                <Tabs defaultValue="notes" className="h-full flex flex-col">
+                <Tabs defaultValue="history" className="h-full flex flex-col">
                     <div className="px-6 pt-4 border-b bg-white">
                         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 max-w-full md:max-w-[650px] gap-2 md:gap-0 h-auto md:h-10">
                             <TabsTrigger value="history">Datos / Historia</TabsTrigger>

@@ -134,14 +134,14 @@ export const AddPatientDialog = ({ open, onOpenChange, onSave, onBookAppointment
                                 <span className="text-xs text-gray-400 font-normal">Finalizar y cerrar</span>
                             </Button>
 
-                            <Button className="h-auto py-4 flex flex-col gap-2 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                            <Button className="h-auto py-4 flex flex-col gap-2" onClick={() => {
                                 handleClose();
                                 onBookAppointment(formData);
                                 // We pass formData because createdPatient structure might vary slightly or we just need these fields for the form
                             }}>
                                 <CalendarPlus className="w-5 h-5" />
                                 <span className="font-semibold">Agendar Cita</span>
-                                <span className="text-xs text-blue-100 font-normal">Crear cita ahora</span>
+                                <span className="text-xs font-normal opacity-80">Crear cita ahora</span>
                             </Button>
                         </div>
                     </div>

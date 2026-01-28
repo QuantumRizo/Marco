@@ -141,13 +141,13 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
                             <button
                                 key={hospital.id}
                                 onClick={() => setBookingHospitalId(hospital.id)}
-                                className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
+                                className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 transition-all text-left group"
                             >
-                                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
                                     <Building2 className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold text-gray-900 group-hover:text-blue-700">{hospital.name}</h3>
+                                    <h3 className="font-semibold text-gray-900 group-hover:text-primary">{hospital.name}</h3>
                                     <p className="text-sm text-gray-500">{hospital.address}</p>
                                 </div>
                             </button>
