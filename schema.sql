@@ -66,12 +66,14 @@ ON CONFLICT (id) DO UPDATE SET
     allowed_days = EXCLUDED.allowed_days;
 
 INSERT INTO services (id, name, description, duration_minutes) VALUES
-    ('srv-1', 'Consulta General', NULL, 90),
-    ('srv-2', 'Limpieza Dental', NULL, 90),
-    ('srv-3', 'Ortodoncia (Revisión)', NULL, 90)
+    ('srv-1', 'Consulta General', NULL, 60),
+    ('srv-2', 'Consulta de Seguimiento', NULL, 30)
 ON CONFLICT (id) DO UPDATE SET
     name = EXCLUDED.name,
     duration_minutes = EXCLUDED.duration_minutes;
+
+-- Clean up any old services that might still exist if running this on existing DB
+DELETE FROM services WHERE id NOT IN ('srv-1', 'srv-2');
 
 -- 6. Enable Row Level Security (RLS)
 ALTER TABLE hospitals ENABLE ROW LEVEL SECURITY;

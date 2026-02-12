@@ -141,16 +141,11 @@ export const SERVICES: Service[] = [
     {
         id: 'srv-1',
         name: 'Consulta General',
-        durationMinutes: 90,
+        durationMinutes: 60,
     },
     {
         id: 'srv-2',
-        name: 'Limpieza Dental',
-        durationMinutes: 90,
-    },
-    {
-        id: 'srv-3',
-        name: 'Ortodoncia (Revisión)',
-        durationMinutes: 90,
+        name: 'Consulta de Seguimiento',
+        durationMinutes: 30,
     }
 ];
