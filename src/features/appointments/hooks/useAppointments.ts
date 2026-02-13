@@ -65,12 +65,18 @@ export const useAppointments = () => {
         try {
             console.log("saveAppointment: Starting process for", patientData.email);
 
-            // 1. Check patient by email
-            const { data: existingPatient, error: searchError } = await supabase
-                .from('patients')
-                .select('id')
-                .eq('email', patientData.email)
-                .maybeSingle(); // Use maybeSingle to avoid 406/PGRST116 error if not found
+            // 1. Check patient
+            let query = supabase.from('patients').select('id');
+
+            if (patientData.email) {
+                // Priority 1: Match by Email
+                query = query.eq('email', patientData.email);
+            } else {
+                // Priority 2: Match by Name + Phone (Exact Match)
+                query = query.eq('name', patientData.name).eq('phone', patientData.phone);
+            }
+
+            const { data: existingPatient, error: searchError } = await query.maybeSingle();
 
             if (searchError) {
                 console.error("saveAppointment: Error searching patient", searchError);
@@ -87,7 +93,8 @@ export const useAppointments = () => {
                     .from('patients')
                     .update({
                         name: patientData.name,
-                        phone: patientData.phone
+                        phone: patientData.phone,
+                        email: patientData.email || null // Update email if provided, or set to null if empty
                     })
                     .eq('id', patientId);
 
@@ -102,9 +109,9 @@ export const useAppointments = () => {
                     .from('patients')
                     .insert([{
                         name: patientData.name,
-                        email: patientData.email,
+                        email: patientData.email || null, // EXPLICITLY NULL if empty string
                         phone: patientData.phone
-                        // notes: patientData.notes  <-- REMOVED: Do not initialize Doctor notes with Patient booking notes
+                        // notes: patientData.notes 
                     }])
                     .select()
                     .single();
@@ -386,17 +393,23 @@ export const useAppointments = () => {
         try {
             setLoading(true);
             // 1. Check if patient exists
-            const { data: existingPatient, error: searchError } = await supabase
-                .from('patients')
-                .select('id')
-                .eq('email', patientData.email)
-                .maybeSingle();
+            let query = supabase.from('patients').select('id');
+
+            if (patientData.email) {
+                query = query.eq('email', patientData.email);
+            } else {
+                query = query.eq('name', patientData.name).eq('phone', patientData.phone);
+            }
+
+            const { data: existingPatient, error: searchError } = await query.maybeSingle();
 
             if (searchError) throw searchError;
 
             if (existingPatient) {
-                // If exists, inform the user (or we could just return the ID, but usually we want to know if it was new)
-                throw new Error("El paciente ya está registrado con este correo.");
+                // If exists, inform the user
+                throw new Error(patientData.email
+                    ? "El paciente ya está registrado con este correo."
+                    : "Ya existe un paciente con este nombre y teléfono.");
             }
 
             // 2. Create new patient
@@ -404,7 +417,7 @@ export const useAppointments = () => {
                 .from('patients')
                 .insert([{
                     name: patientData.name,
-                    email: patientData.email,
+                    email: patientData.email || null, // Convert empty string to null
                     phone: patientData.phone,
                     notes: patientData.notes || ''
                 }])

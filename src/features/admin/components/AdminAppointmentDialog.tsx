@@ -76,7 +76,7 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
         if (!bookingHospitalId) return;
 
         // Basic Validation
-        if (!patient.name || !patient.email || !patient.phone || !appointment.date || !appointment.time || !appointment.reason) {
+        if (!patient.name || !patient.phone || !appointment.date || !appointment.time || !appointment.reason) {
             alert("Por favor complete todos los campos obligatorios");
             return;
         }
@@ -180,7 +180,7 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="admin-email">Correo Electrónico *</Label>
+                                <Label htmlFor="admin-email">Correo Electrónico (Opcional)</Label>
                                 <Input
                                     id="admin-email"
                                     type="email"

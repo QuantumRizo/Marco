@@ -31,8 +31,8 @@ export const AddPatientDialog = ({ open, onOpenChange, onSave, onBookAppointment
 
     const handleSubmit = async () => {
         // Basic validation
-        if (!formData.name || !formData.email || !formData.phone) {
-            alert("Por favor complete nombre, correo y teléfono.");
+        if (!formData.name || !formData.phone) {
+            alert("Por favor complete nombre y teléfono.");
             return;
         }
 
@@ -90,7 +90,7 @@ export const AddPatientDialog = ({ open, onOpenChange, onSave, onBookAppointment
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="new-email">Correo Electrónico *</Label>
+                                <Label htmlFor="new-email">Correo Electrónico (Opcional)</Label>
                                 <Input
                                     id="new-email"
                                     type="email"
