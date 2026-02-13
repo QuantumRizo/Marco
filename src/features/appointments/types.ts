@@ -78,6 +78,7 @@ export interface Patient {
     notes: string; // Internal notes for the doctor
     history: string[]; // IDs of past appointments
     medicalHistory?: MedicalHistory; // JSONB from DB
+    appId?: string;
 }
 
 export interface Appointment {
@@ -92,6 +93,7 @@ export interface Appointment {
     status: 'confirmed' | 'pending' | 'cancelled' | 'completed' | 'blocked' | 'waiting_room' | 'in_progress' | 'finished';
     notes?: string;
     clinicalData?: SoapNote; // JSONB from DB
+    appId?: string;
 }
 
 export interface HospitalSchedule {

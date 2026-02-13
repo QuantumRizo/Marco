@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 import type { Appointment, Patient } from '../types';
 import { HOSPITALS, SERVICES, HOSPITAL_SCHEDULES } from '../types';
 
+const APP_ID = 'marco'; // Hardcoded for this specific application
+
 export const useAppointments = () => {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [patients, setPatients] = useState<Patient[]>([]);
@@ -11,11 +13,12 @@ export const useAppointments = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            // Fetch Appointments
+            // Fetch Appointments - FILTERED BY APP_ID
             // Mapping DB columns snake_case to camelCase manually for now to match UI types
             const { data: appointmentsData, error: appointmentsError } = await supabase
                 .from('appointments')
-                .select('*');
+                .select('*')
+                .eq('app_id', APP_ID); // FILTER ADDED
 
             if (appointmentsError) throw appointmentsError;
 
@@ -30,19 +33,22 @@ export const useAppointments = () => {
                 status: a.status,
                 serviceName: a.service_name, // Optional if we add this to DB or join
                 notes: a.notes, // Fetching the notes where we saved the custom description
-                clinicalData: a.clinical_data // JSONB from DB
+                clinicalData: a.clinical_data, // JSONB from DB
+                appId: a.app_id
             }));
 
-            // Fetch Patients
+            // Fetch Patients - FILTERED BY APP_ID
             const { data: patientsData, error: patientsError } = await supabase
                 .from('patients')
-                .select('*');
+                .select('*')
+                .eq('app_id', APP_ID); // FILTER ADDED
 
             if (patientsError) throw patientsError;
 
             const mappedPatients = (patientsData || []).map((p: any) => ({
                 ...p,
-                medicalHistory: p.medical_history // JSONB from DB
+                medicalHistory: p.medical_history, // JSONB from DB
+                appId: p.app_id
             }));
 
             setAppointments(mappedAppointments);
@@ -66,7 +72,7 @@ export const useAppointments = () => {
             console.log("saveAppointment: Starting process for", patientData.email);
 
             // 1. Check patient
-            let query = supabase.from('patients').select('id');
+            let query = supabase.from('patients').select('id').eq('app_id', APP_ID); // FILTER ADDED
 
             if (patientData.email) {
                 // Priority 1: Match by Email
@@ -110,8 +116,9 @@ export const useAppointments = () => {
                     .insert([{
                         name: patientData.name,
                         email: patientData.email || null, // EXPLICITLY NULL if empty string
-                        phone: patientData.phone
-                        // notes: patientData.notes 
+                        phone: patientData.phone,
+                        // notes: patientData.notes,
+                        app_id: APP_ID // APP_ID ADDED
                     }])
                     .select()
                     .single();
@@ -138,7 +145,8 @@ export const useAppointments = () => {
                     reason: appointmentData.reason,
                     date: isoDateTime,
                     status: 'confirmed',
-                    notes: appointmentData.notes // Saving the combined notes here
+                    notes: appointmentData.notes, // Saving the combined notes here
+                    app_id: APP_ID // APP_ID ADDED
                 }]);
 
             if (appointmentError) {
@@ -289,6 +297,7 @@ export const useAppointments = () => {
                 .from('patients')
                 .select('id')
                 .eq('email', 'system@block.com')
+                .eq('app_id', APP_ID) // FILTER ADDED
                 .maybeSingle();
 
             if (existingBlockPatient) {
@@ -300,7 +309,8 @@ export const useAppointments = () => {
                         name: 'BLOQUEO DE HORARIO',
                         email: 'system@block.com',
                         phone: '0000000000',
-                        notes: 'Usuario sistema para bloqueos'
+                        notes: 'Usuario sistema para bloqueos',
+                        app_id: APP_ID // APP_ID ADDED
                     }])
                     .select()
                     .single();
@@ -319,7 +329,8 @@ export const useAppointments = () => {
                     reason: 'specific-service',
                     status: 'blocked',
                     date: isoDateTime,
-                    notes: 'Horario Bloqueado Manualmente'
+                    notes: 'Horario Bloqueado Manualmente',
+                    app_id: APP_ID // APP_ID ADDED
                 }]);
 
             if (error) throw error;
@@ -393,7 +404,7 @@ export const useAppointments = () => {
         try {
             setLoading(true);
             // 1. Check if patient exists
-            let query = supabase.from('patients').select('id');
+            let query = supabase.from('patients').select('id').eq('app_id', APP_ID); // FILTER ADDED
 
             if (patientData.email) {
                 query = query.eq('email', patientData.email);
@@ -419,7 +430,8 @@ export const useAppointments = () => {
                     name: patientData.name,
                     email: patientData.email || null, // Convert empty string to null
                     phone: patientData.phone,
-                    notes: patientData.notes || ''
+                    notes: patientData.notes || '',
+                    app_id: APP_ID // APP_ID ADDED
                 }])
                 .select()
                 .single();
@@ -455,3 +467,4 @@ export const useAppointments = () => {
         loading
     };
 };
+
