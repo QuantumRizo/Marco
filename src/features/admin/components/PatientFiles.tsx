@@ -174,14 +174,26 @@ export const PatientFiles = ({ patientId }: PatientFilesProps) => {
                 <CardContent className="space-y-4">
                     <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
-                            <Label htmlFor="file-upload">Seleccionar Archivo</Label>
-                            <Input
-                                id="file-upload"
-                                type="file"
-                                onChange={handleFileSelect}
-                                accept="image/*,.pdf"
-                                className="bg-white"
-                            />
+                            <Label htmlFor="file-upload">Archivo</Label>
+                            <div className="flex gap-2 items-center">
+                                <Label
+                                    htmlFor="file-upload"
+                                    className="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-900 h-10 px-4 py-2 shadow-sm"
+                                >
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    {selectedFile ? 'Cambiar archivo' : 'Seleccionar archivo'}
+                                </Label>
+                                <span className="text-sm text-gray-500 truncate max-w-[200px]">
+                                    {selectedFile ? selectedFile.name : 'Ningún archivo seleccionado'}
+                                </span>
+                                <Input
+                                    id="file-upload"
+                                    type="file"
+                                    onChange={handleFileSelect}
+                                    accept="image/*,.pdf"
+                                    className="hidden"
+                                />
+                            </div>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="description">Descripción (Opcional)</Label>

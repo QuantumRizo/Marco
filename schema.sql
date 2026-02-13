@@ -115,7 +115,6 @@ CREATE POLICY "Enable Delete for Anon" ON patient_uploads FOR DELETE USING (true
 -- RECOMMENDATION: Create the 'patient_files' bucket manually in the Supabase Dashboard -> Storage.
 -- Then, you can try running the policy creation commands below if the bucket exists.
 
-/*
 INSERT INTO storage.buckets (id, name, public) VALUES ('patient_files', 'patient_files', true)
 ON CONFLICT (id) DO NOTHING;
 
@@ -123,4 +122,3 @@ ON CONFLICT (id) DO NOTHING;
 CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING ( bucket_id = 'patient_files' );
 CREATE POLICY "Public Upload" ON storage.objects FOR INSERT WITH CHECK ( bucket_id = 'patient_files' );
 CREATE POLICY "Public Delete" ON storage.objects FOR DELETE USING ( bucket_id = 'patient_files' );
-*/
