@@ -17,6 +17,17 @@ import { useNavigate } from 'react-router-dom';
 
 export const AdminDashboard = () => {
     const { hospitals, blockSlot, saveAppointment, addPatient } = useAppointments();
+
+    // Helper helper
+    const formatTime = (timeStr: string) => {
+        if (!timeStr) return '';
+        const [hours, minutes] = timeStr.split(':');
+        const date = new Date();
+        date.setHours(parseInt(hours, 10));
+        date.setMinutes(parseInt(minutes, 10));
+        return new Intl.DateTimeFormat('es-MX', { hour: 'numeric', minute: '2-digit', hour12: true }).format(date);
+    };
+
     // Local state for Blocking Dialog since there is no global hospital anymore
     const [blockHospitalId, setBlockHospitalId] = useState(hospitals[0]?.id || '');
 
@@ -145,14 +156,14 @@ export const AdminDashboard = () => {
                                                         onChange={(e) => setBlockTime(e.target.value)}
                                                     >
                                                         <option value="">Seleccionar hora...</option>
-                                                        {Array.from({ length: 10 }).map((_, i) => {
+                                                        {Array.from({ length: 12 }).map((_, i) => {
                                                             const hour = 9 + i;
                                                             const time = `${hour.toString().padStart(2, '0')}:00`;
                                                             const time30 = `${hour.toString().padStart(2, '0')}:30`;
                                                             return (
                                                                 <>
-                                                                    <option key={time} value={time}>{time}</option>
-                                                                    <option key={time30} value={time30}>{time30}</option>
+                                                                    <option key={time} value={time}>{formatTime(time)}</option>
+                                                                    <option key={time30} value={time30}>{formatTime(time30)}</option>
                                                                 </>
                                                             );
                                                         })}

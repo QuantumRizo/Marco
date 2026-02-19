@@ -18,6 +18,16 @@ interface AdminAppointmentDialogProps {
 export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, initialPatientData }: AdminAppointmentDialogProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Helper helper
+    const formatTime = (timeStr: string) => {
+        if (!timeStr) return '';
+        const [hours, minutes] = timeStr.split(':');
+        const date = new Date();
+        date.setHours(parseInt(hours, 10));
+        date.setMinutes(parseInt(minutes, 10));
+        return new Intl.DateTimeFormat('es-MX', { hour: 'numeric', minute: '2-digit', hour12: true }).format(date);
+    };
+
     // Controls the flow: if null, show selection screen. If set, show form.
     const [bookingHospitalId, setBookingHospitalId] = useState<string | null>(null);
 
@@ -266,13 +276,13 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
                                         onChange={(e) => handleAppointmentChange('time', e.target.value)}
                                     >
                                         <option value="">Seleccionar hora...</option>
-                                        {Array.from({ length: 13 }).map((_, i) => { // 9:00 to 15:00 every 30 mins
+                                        {Array.from({ length: 23 }).map((_, i) => { // 9:00 to 20:00 every 30 mins
                                             const startHour = 9;
                                             const totalMinutes = i * 30;
                                             const hour = startHour + Math.floor(totalMinutes / 60);
                                             const minutes = totalMinutes % 60;
                                             const time = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-                                            return <option key={time} value={time}>{time}</option>;
+                                            return <option key={time} value={time}>{formatTime(time)}</option>;
                                         })}
                                     </select>
                                 </div>

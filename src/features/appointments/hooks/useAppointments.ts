@@ -22,20 +22,37 @@ export const useAppointments = () => {
 
             if (appointmentsError) throw appointmentsError;
 
-            const mappedAppointments: Appointment[] = (appointmentsData || []).map((a: any) => ({
-                id: a.id,
-                hospitalId: a.hospital_id,
-                serviceId: a.service_id,
-                patientId: a.patient_id,
-                reason: a.reason,
-                date: a.date.split('T')[0], // Extract YYYY-MM-DD
-                time: new Date(a.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }), // Extract HH:MM
-                status: a.status,
-                serviceName: a.service_name, // Optional if we add this to DB or join
-                notes: a.notes, // Fetching the notes where we saved the custom description
-                clinicalData: a.clinical_data, // JSONB from DB
-                appId: a.app_id
-            }));
+            const mappedAppointments: Appointment[] = (appointmentsData || []).map((a: any) => {
+                // Handle Date/Time extraction treating UTC as "Clinic Wall Clock"
+                // DB Format: "YYYY-MM-DD HH:MM:SS+00" or ISO
+                let dateStr = a.date;
+                let timeStr = "";
+
+                if (dateStr.includes('T')) {
+                    const parts = dateStr.split('T');
+                    dateStr = parts[0];
+                    timeStr = parts[1].substring(0, 5); // Extract HH:MM
+                } else if (dateStr.includes(' ')) {
+                    const parts = dateStr.split(' ');
+                    dateStr = parts[0];
+                    timeStr = parts[1].substring(0, 5); // Extract HH:MM
+                }
+
+                return {
+                    id: a.id,
+                    hospitalId: a.hospital_id,
+                    serviceId: a.service_id,
+                    patientId: a.patient_id,
+                    reason: a.reason,
+                    date: dateStr,
+                    time: timeStr,
+                    status: a.status,
+                    serviceName: a.service_name,
+                    notes: a.notes,
+                    clinicalData: a.clinical_data,
+                    appId: a.app_id
+                };
+            });
 
             // Fetch Patients - FILTERED BY APP_ID
             const { data: patientsData, error: patientsError } = await supabase
@@ -188,8 +205,8 @@ export const useAppointments = () => {
 
         // Parse date to check day of week
         // date string is YYYY-MM-DD
-        // We append T00:00:00 to ensure local time parsing or use split
         const [year, month, day] = date.split('-').map(Number);
+        // helper to get day of week for YYYY-MM-DD safely
         const dateObj = new Date(year, month - 1, day);
         const dayOfWeek = dateObj.getDay(); // 0-6
 
@@ -198,19 +215,9 @@ export const useAppointments = () => {
             return [];
         }
 
-        // Generate slots every 30 minutes starting from 9:00 AM to 3:00 PM (15:00)
-        // using APPOINTMENT_CONFIG constants would be better but for now hardcoding to match plan/speed unless I import them
-        // Let's import them.
-        // Wait, I can't easily import inside a replace_content without adding the import at the top.
-        // I will use magic numbers here matching the plan: 9 to 15, step 30.
-        // Or better, I'll update the imports first in a separate move? 
-        // No, I can stick to the plan values since I just defined them. 
-        // Actually, to be clean, I should add the import to the file first. 
-        // But for this block, I will implement the logic directly.
-
         const slots: string[] = [];
         const startHour = 9;
-        const endHour = 15; // 3 PM
+        const endHour = 20.5; // 8 PM inclusive
         const interval = 30;
 
         // Existing appointments for this day and hospital from STATE
@@ -220,15 +227,14 @@ export const useAppointments = () => {
             a.status !== 'cancelled'
         );
 
-        let currentTime = new Date(`2000-01-01T${startHour.toString().padStart(2, '0')}:00:00`);
-        const endTime = new Date(`2000-01-01T${endHour.toString().padStart(2, '0')}:00:00`);
+        let currentMinute = startHour * 60;
+        const endMinute = endHour * 60;
 
-        // We want to include endHour? usually endHour is exclusive for start time of appointment
-        // If they work 9-3, last appt is probably 2:30 or 14:30.
-        // If endHour is 15 (3pm), loop should go while < endTime
-
-        while (currentTime < endTime) {
-            const timeString = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        while (currentMinute < endMinute) {
+            const h = Math.floor(currentMinute / 60);
+            const m = currentMinute % 60;
+            // Deterministic HH:MM format
+            const timeString = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 
             // Check if blocked
             const isBlocked = existingForDay.some(a => a.time === timeString);
@@ -238,7 +244,7 @@ export const useAppointments = () => {
             }
 
             // Add 30 minutes
-            currentTime.setMinutes(currentTime.getMinutes() + interval);
+            currentMinute += interval;
         }
 
         return slots;

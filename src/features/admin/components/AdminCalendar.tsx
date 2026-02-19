@@ -42,6 +42,15 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
     const { appointments, patients, hospitals, updateAppointmentStatus, updateAppointment, getAvailableSlots } = useAppointments();
     const [currentDate, setCurrentDate] = useState(new Date());
 
+    const formatTime = (timeStr: string) => {
+        if (!timeStr) return '';
+        const [hours, minutes] = timeStr.split(':');
+        const date = new Date();
+        date.setHours(parseInt(hours, 10));
+        date.setMinutes(parseInt(minutes, 10));
+        return format(date, 'h:mm a', { locale: es });
+    };
+
     // Edit Mode State
     const [isEditing, setIsEditing] = useState(false);
     const [editDate, setEditDate] = useState("");
@@ -204,7 +213,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                 <span className="text-[9px] font-bold bg-[#1c334a]/10 text-[#1c334a] px-1 rounded uppercase">
                                                                     {hospitals.find(h => h.id === apt.hospitalId)?.name.substring(0, 3)}
                                                                 </span>
-                                                                {apt.time} - {patient?.name.split(' ')[0] || 'Cita'}
+                                                                {formatTime(apt.time)} - {patient?.name.split(' ')[0] || 'Cita'}
                                                             </div>
                                                         </button>
                                                     </DialogTrigger>
@@ -234,9 +243,9 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                     >
                                                                         <option value="" disabled>Seleccionar hora</option>
                                                                         {getAvailableSlots(editDate, apt.hospitalId).map(slot => (
-                                                                            <option key={slot} value={slot}>{slot}</option>
+                                                                            <option key={slot} value={slot}>{formatTime(slot)}</option>
                                                                         ))}
-                                                                        <option value={apt.time}>{apt.time} (Actual)</option>
+                                                                        <option value={apt.time}>{formatTime(apt.time)} (Actual)</option>
                                                                     </select>
                                                                 </div>
                                                                 <div className="flex justify-end gap-2 pt-2">
@@ -296,7 +305,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                         <Clock className="w-4 h-4 text-[#1c334a]" />
                                                                         <div>
                                                                             <span className="block text-xs text-gray-400">Hora</span>
-                                                                            {apt.time}
+                                                                            {formatTime(apt.time)}
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -386,8 +395,8 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                         <DialogTrigger asChild>
                                                             <div className="p-3 flex gap-3 items-center hover:bg-gray-50 transition-colors cursor-pointer active:bg-gray-100">
                                                                 <div className="flex flex-col items-center justify-center min-w-[3.5rem] py-1 bg-gray-100 rounded text-gray-700 font-bold text-sm">
-                                                                    {apt.time.split(':')[0]}
-                                                                    <span className="text-[10px] font-normal text-gray-500">:{apt.time.split(':')[1]}</span>
+                                                                    {formatTime(apt.time).split(' ')[0]}
+                                                                    <span className="text-[10px] font-normal text-gray-500">{formatTime(apt.time).split(' ')[1]}</span>
                                                                 </div>
 
                                                                 <div className="flex-1 min-w-0">
@@ -436,9 +445,9 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                         >
                                                                             <option value="" disabled>Seleccionar hora</option>
                                                                             {getAvailableSlots(editDate, apt.hospitalId).map(slot => (
-                                                                                <option key={slot} value={slot}>{slot}</option>
+                                                                                <option key={slot} value={slot}>{formatTime(slot)}</option>
                                                                             ))}
-                                                                            <option value={apt.time}>{apt.time} (Actual)</option>
+                                                                            <option value={apt.time}>{formatTime(apt.time)} (Actual)</option>
                                                                         </select>
                                                                     </div>
                                                                     <div className="flex justify-end gap-2 pt-2">

@@ -26,6 +26,16 @@ export const PatientClinicalRecord = ({
     hospitals,
     onUpdatePatient
 }: PatientClinicalRecordProps) => {
+
+    const formatTime = (timeStr: string) => {
+        if (!timeStr) return '';
+        const [hours, minutes] = timeStr.split(':');
+        const date = new Date();
+        date.setHours(parseInt(hours, 10));
+        date.setMinutes(parseInt(minutes, 10));
+        return format(date, 'h:mm a', { locale: es });
+    };
+
     // REMOVED useAppointments hook to avoid re-fetching data on every open
     const [patient, setPatient] = useState<Patient>(initialPatient);
     const [generalNotes, setGeneralNotes] = useState<string>(initialPatient.notes || '');
@@ -149,7 +159,7 @@ export const PatientClinicalRecord = ({
                                                         <TableCell className="font-medium">
                                                             {format(parseISO(appt.date), 'dd MMM yyyy', { locale: es })}
                                                         </TableCell>
-                                                        <TableCell>{appt.time}</TableCell>
+                                                        <TableCell>{formatTime(appt.time)}</TableCell>
                                                         <TableCell>
                                                             {hospitals?.find(h => h.id === appt.hospitalId)?.name || '-'}
                                                         </TableCell>

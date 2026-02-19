@@ -21,6 +21,16 @@ interface PatientDirectoryProps {
 
 export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) => {
     const { hospitals, appointments, patients, deletePatient, updatePatient, addPatient, loading } = useAppointments();
+
+    const formatTime = (timeStr: string) => {
+        if (!timeStr) return '';
+        const [hours, minutes] = timeStr.split(':');
+        const date = new Date();
+        date.setHours(parseInt(hours, 10));
+        date.setMinutes(parseInt(minutes, 10));
+        return format(date, 'h:mm a', { locale: es });
+    };
+
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -133,7 +143,7 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 {/* Search with Autocomplete */}
-                <div className="relative z-50 w-full md:w-[300px]">
+                <div className="relative z-30 w-full md:w-[300px]">
                     <div className="flex items-center gap-2 bg-white p-1 rounded-lg border shadow-sm">
                         <Search className="w-4 h-4 ml-2 text-gray-400" />
                         <Input
@@ -265,7 +275,7 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
                                                         {nextAppt && (
                                                             <div className="text-xs text-green-600 flex items-center gap-1 mt-1 font-medium bg-green-50 w-fit px-2 py-0.5 rounded-full">
                                                                 <Calendar className="w-3 h-3" />
-                                                                Próxima: {format(parseISO(nextAppt.date), 'dd MMM', { locale: es })} - {nextAppt.time}
+                                                                Próxima: {format(parseISO(nextAppt.date), 'dd MMM', { locale: es })} - {formatTime(nextAppt.time)}
                                                             </div>
                                                         )}
                                                     </TableCell>
@@ -359,7 +369,7 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
                                                             PRÓXIMA
                                                         </div>
                                                         {format(parseISO(nextAppt.date), 'dd MMM', { locale: es })}
-                                                        <div className="font-normal">{nextAppt.time}</div>
+                                                        <div className="font-normal">{formatTime(nextAppt.time)}</div>
                                                     </div>
                                                 )}
                                             </div>
