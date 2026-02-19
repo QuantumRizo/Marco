@@ -41,6 +41,7 @@ interface Appointment {
 export const AdminCalendar = (_props: AdminCalendarProps) => {
     const { appointments, patients, hospitals, updateAppointmentStatus, updateAppointment, getAvailableSlots } = useAppointments();
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
     const formatTime = (timeStr: string) => {
         if (!timeStr) return '';
@@ -337,17 +338,72 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                 </Dialog>
                                             );
                                         })}
-                                        {dayAppts.length > 3 && (
-                                            <div className="text-[10px] text-gray-500 pl-1">
-                                                + {dayAppts.length - 3} más
-                                            </div>
-                                        )}
                                     </div>
+                                    {dayAppts.length > 3 && (
+                                        <button
+                                            className="absolute bottom-1 right-1 w-6 h-6 flex items-center justify-center rounded-full bg-[#1c334a] text-white text-[10px] font-bold shadow-md hover:bg-[#152738] transition-all z-10"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedDay(day);
+                                            }}
+                                        >
+                                            +{dayAppts.length - 3}
+                                        </button>
+                                    )}
                                 </div>
                             );
                         })}
                     </div>
                 </div>
+
+                {/* Dialog for Viewing All Appointments on a specific day */}
+                <Dialog open={!!selectedDay} onOpenChange={(open) => !open && setSelectedDay(null)}>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>
+                                Citas del {selectedDay && format(selectedDay, "d 'de' MMMM", { locale: es })}
+                            </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-2 max-h-[60vh] overflow-y-auto pr-2">
+                            {selectedDay && getDayAppointments(selectedDay).map(apt => {
+                                const patient = patients.find(p => p.id === apt.patientId);
+                                return (
+                                    <div
+                                        key={apt.id}
+                                        className="p-3 flex gap-3 items-center hover:bg-gray-50 transition-colors cursor-pointer border rounded-lg active:bg-gray-100"
+                                        onClick={() => {
+                                            setSelectedDay(null); // Close day view
+                                            startEditing(apt); // Open edit/detail view
+                                        }}
+                                    >
+                                        <div className="flex flex-col items-center justify-center min-w-[3.5rem] py-1 bg-gray-100 rounded text-gray-700 font-bold text-sm">
+                                            {formatTime(apt.time).split(' ')[0]}
+                                            <span className="text-[10px] font-normal text-gray-500">{formatTime(apt.time).split(' ')[1]}</span>
+                                        </div>
+
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-semibold text-gray-900 truncate flex items-center gap-2">
+                                                {patient?.name}
+                                                <Badge variant="outline" className="text-[9px] h-4 px-1 bg-blue-50 text-blue-700 border-blue-100">
+                                                    {hospitals.find(h => h.id === apt.hospitalId)?.name}
+                                                </Badge>
+                                            </div>
+                                            <div className="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
+                                                <span className="truncate max-w-[150px]">
+                                                    {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason)}
+                                                </span>
+                                                <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                                                <Badge variant="outline" className={`text-[9px] h-4 px-1 ${getStatusColor(apt.status)} border-0`}>
+                                                    {getStatusLabel(apt.status)}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </DialogContent>
+                </Dialog>
 
                 {/* Mobile List View */}
                 <div className="md:hidden space-y-6 pb-20">
