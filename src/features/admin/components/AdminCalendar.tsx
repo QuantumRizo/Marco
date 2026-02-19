@@ -61,8 +61,8 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
     // Calendar generation
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(monthStart);
-    const startDate = startOfWeek(monthStart, { locale: es });
-    const endDate = endOfWeek(monthEnd, { locale: es });
+    const startDate = startOfWeek(monthStart, { locale: es, weekStartsOn: 0 });
+    const endDate = endOfWeek(monthEnd, { locale: es, weekStartsOn: 0 });
 
     const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
 

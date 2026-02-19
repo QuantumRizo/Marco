@@ -55,8 +55,8 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
         // 4. Filter by Search Term
         const search = searchTerm.toLowerCase();
         return basePatients.filter(p =>
-            (p.name || '').toLowerCase().includes(search) ||
-            (p.email || '').toLowerCase().includes(search)
+            (p.name?.toLowerCase() || '').includes(search) ||
+            (p.email?.toLowerCase() || '').includes(search)
         );
     }, [appointments, patients, selectedHospitalFilter, searchTerm]);
 
@@ -73,7 +73,7 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
             const patient = patients.find(p => p.id === appt.patientId);
             if (!patient) return;
 
-            if (patient.name.toLowerCase().includes(search)) {
+            if (patient.name?.toLowerCase().includes(search)) {
                 const key = `${patient.id}-${appt.hospitalId}`;
                 if (!seen.has(key)) {
                     seen.add(key);
