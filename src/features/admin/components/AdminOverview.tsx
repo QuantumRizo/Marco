@@ -179,159 +179,162 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
                                 {todayAppointments.sort((a, b) => a.time.localeCompare(b.time)).map(apt => {
                                     const patient = patients.find(p => p.id === apt.patientId);
                                     return (
-                                        <Dialog key={apt.id} onOpenChange={(open) => !open && cancelEditing()}>
-                                            <DialogTrigger asChild>
-                                                <div className="flex items-center justify-between p-2 border rounded-md bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer active:bg-gray-100">
-                                                    <div className="flex items-center gap-2.5">
-                                                        <div className="flex flex-col items-center justify-center w-10 h-10 bg-white border rounded-md shadow-sm shrink-0">
-                                                            <span className="text-[10px] font-bold text-[#1c334a] leading-none text-center">
-                                                                {formatTime(apt.time).split(' ')[0]}<br />
-                                                                <span className="text-[8px] font-normal">{formatTime(apt.time).split(' ')[1]}</span>
-                                                            </span>
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <h4 className="font-semibold text-gray-900 text-xs truncate">{patient?.name || 'Paciente Desconocido'}</h4>
-                                                            <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 text-[10px] text-gray-500">
-                                                                <span className="flex items-center gap-1">
-                                                                    <MapPin className="w-2 h-2" />
-                                                                    {hospitals.find(h => h.id === apt.hospitalId)?.name}
-                                                                </span>
-                                                                <span className="hidden sm:inline text-gray-300">|</span>
-                                                                <span className="truncate">
-                                                                    {apt.reason === 'specific-service' ? apt.serviceName : (
-                                                                        apt.reason === 'first-visit' ? 'Primera vez' :
-                                                                            apt.reason === 'follow-up' ? 'Seguimiento' :
-                                                                                apt.reason
-                                                                    )}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 shrink-0">
-                                                        <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-medium border ${apt.status === 'cancelled'
-                                                            ? 'bg-red-50 text-red-700 border-red-100'
-                                                            : 'bg-green-50 text-green-700 border-green-100'}`}>
-                                                            {apt.status === 'cancelled' ? 'Cancelada' : 'Confirmada'}
+                                        <div key={apt.id} className="flex items-center justify-between p-2 border rounded-md bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                                            <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                                                <div className="flex flex-col items-center justify-center w-10 h-10 bg-white border rounded-md shadow-sm shrink-0">
+                                                    <span className="text-[10px] font-bold text-[#1c334a] leading-none text-center">
+                                                        {formatTime(apt.time).split(' ')[0]}<br />
+                                                        <span className="text-[8px] font-normal">{formatTime(apt.time).split(' ')[1]}</span>
+                                                    </span>
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <h4 className="font-semibold text-gray-900 text-xs truncate">{patient?.name || 'Paciente Desconocido'}</h4>
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 text-[10px] text-gray-500">
+                                                        <span className="flex items-center gap-1">
+                                                            <MapPin className="w-2 h-2" />
+                                                            {hospitals.find(h => h.id === apt.hospitalId)?.name}
+                                                        </span>
+                                                        <span className="hidden sm:inline text-gray-300">|</span>
+                                                        <span className="truncate">
+                                                            {apt.reason === 'specific-service' ? apt.serviceName : (
+                                                                apt.reason === 'first-visit' ? 'Primera vez' :
+                                                                    apt.reason === 'follow-up' ? 'Seguimiento' :
+                                                                        apt.reason
+                                                            )}
                                                         </span>
                                                     </div>
                                                 </div>
-                                            </DialogTrigger>
-                                            <DialogContent>
-                                                <DialogHeader>
-                                                    <DialogTitle>
-                                                        {isEditing ? 'Reprogramar Cita' : 'Detalles de la Cita'}
-                                                    </DialogTitle>
-                                                </DialogHeader>
+                                            </div>
+                                            <div className="flex items-center gap-2 shrink-0 pl-2">
+                                                <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-medium border ${apt.status === 'cancelled'
+                                                    ? 'bg-red-50 text-red-700 border-red-100'
+                                                    : 'bg-green-50 text-green-700 border-green-100'}`}>
+                                                    {apt.status === 'cancelled' ? 'Cancelada' : 'Confirmada'}
+                                                </span>
+                                                <Dialog onOpenChange={(open) => !open && cancelEditing()}>
+                                                    <DialogTrigger asChild>
+                                                        <Button size="sm" className="h-7 text-xs px-2 bg-[#1c334a] text-white hover:bg-[#152738]">
+                                                            Modificar
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent>
+                                                        <DialogHeader>
+                                                            <DialogTitle>
+                                                                {isEditing ? 'Reprogramar Cita' : 'Detalles de la Cita'}
+                                                            </DialogTitle>
+                                                        </DialogHeader>
 
-                                                {isEditing && selectedAppointmentId === apt.id ? (
-                                                    <div className="space-y-4 py-2">
-                                                        <div className="grid gap-2">
-                                                            <Label>Nueva Fecha</Label>
-                                                            <Input
-                                                                type="date"
-                                                                value={editDate}
-                                                                onChange={(e) => setEditDate(e.target.value)}
-                                                            />
-                                                        </div>
-                                                        <div className="grid gap-2">
-                                                            <Label>Nuevo Horario</Label>
-                                                            <select
-                                                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                                                                value={editTime}
-                                                                onChange={(e) => setEditTime(e.target.value)}
-                                                            >
-                                                                <option value="" disabled>Seleccionar hora</option>
-                                                                {getAvailableSlots(editDate, apt.hospitalId).map(slot => (
-                                                                    <option key={slot} value={slot}>{formatTime(slot)}</option>
-                                                                ))}
-                                                                <option value={apt.time}>{formatTime(apt.time)} (Actual)</option>
-                                                            </select>
-                                                        </div>
-                                                        <div className="flex justify-end gap-2 pt-2">
-                                                            <Button variant="outline" size="sm" onClick={cancelEditing}>Cancelar</Button>
-                                                            <Button size="sm" onClick={saveReschedule} className="bg-[#1c334a]">
-                                                                <Check className="w-4 h-4 mr-2" /> Guardar Cambios
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="grid gap-4 py-4">
-                                                        <div className="full-w bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center justify-between">
-                                                            <span className="text-sm font-medium text-slate-700">Estado Actual:</span>
-                                                            <select
-                                                                className="h-8 w-[180px] rounded-md border border-input bg-white px-3 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                                                                value={apt.status}
-                                                                onChange={(e) => handleStatusChange(apt.id, e)}
-                                                                disabled={apt.status === 'blocked'}
-                                                            >
-                                                                <option value="confirmed">Confirmada</option>
-                                                                <option value="cancelled" className="text-red-600">Cancelar Cita</option>
-                                                            </select>
-                                                        </div>
-
-                                                        <div className="flex items-center gap-3 bg-blue-50/50 p-2 rounded-lg border border-blue-100 mb-2">
-                                                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
-                                                                <Building2 className="w-4 h-4" />
-                                                            </div>
-                                                            <div>
-                                                                <span className="text-xs text-gray-500 block">Sede</span>
-                                                                <span className="text-sm font-semibold text-[#1c334a]">
-                                                                    {hospitals.find(h => h.id === apt.hospitalId)?.name}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                                                                <User className="w-5 h-5" />
-                                                            </div>
-                                                            <div>
-                                                                <div className="font-bold text-lg">{patient?.name}</div>
-                                                                <div className="text-sm text-gray-500">{patient?.email}</div>
-                                                                <div className="text-sm text-gray-500">{patient?.phone}</div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="grid grid-cols-2 gap-4 text-sm mt-2">
-                                                            <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded">
-                                                                <Calendar className="w-4 h-4 text-[#1c334a]" />
-                                                                <div>
-                                                                    <span className="block text-xs text-gray-400">Fecha</span>
-                                                                    {format(parseISO(apt.date), "PPP", { locale: es })}
+                                                        {isEditing && selectedAppointmentId === apt.id ? (
+                                                            <div className="space-y-4 py-2">
+                                                                <div className="grid gap-2">
+                                                                    <Label>Nueva Fecha</Label>
+                                                                    <Input
+                                                                        type="date"
+                                                                        value={editDate}
+                                                                        onChange={(e) => setEditDate(e.target.value)}
+                                                                    />
+                                                                </div>
+                                                                <div className="grid gap-2">
+                                                                    <Label>Nuevo Horario</Label>
+                                                                    <select
+                                                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                                                        value={editTime}
+                                                                        onChange={(e) => setEditTime(e.target.value)}
+                                                                    >
+                                                                        <option value="" disabled>Seleccionar hora</option>
+                                                                        {getAvailableSlots(editDate, apt.hospitalId).map(slot => (
+                                                                            <option key={slot} value={slot}>{formatTime(slot)}</option>
+                                                                        ))}
+                                                                        <option value={apt.time}>{formatTime(apt.time)} (Actual)</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div className="flex justify-end gap-2 pt-2">
+                                                                    <Button variant="outline" size="sm" onClick={cancelEditing}>Cancelar</Button>
+                                                                    <Button size="sm" onClick={saveReschedule} className="bg-[#1c334a]">
+                                                                        <Check className="w-4 h-4 mr-2" /> Guardar Cambios
+                                                                    </Button>
                                                                 </div>
                                                             </div>
-                                                            <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded">
-                                                                <Clock className="w-4 h-4 text-[#1c334a]" />
-                                                                <div>
-                                                                    <span className="block text-xs text-gray-400">Hora</span>
-                                                                    {formatTime(apt.time)}
+                                                        ) : (
+                                                            <div className="grid gap-4 py-4">
+                                                                <div className="full-w bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center justify-between">
+                                                                    <span className="text-sm font-medium text-slate-700">Estado Actual:</span>
+                                                                    <select
+                                                                        className="h-8 w-[180px] rounded-md border border-input bg-white px-3 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                                                        value={apt.status}
+                                                                        onChange={(e) => handleStatusChange(apt.id, e)}
+                                                                        disabled={apt.status === 'blocked'}
+                                                                    >
+                                                                        <option value="confirmed">Confirmada</option>
+                                                                        <option value="cancelled" className="text-red-600">Cancelar Cita</option>
+                                                                    </select>
                                                                 </div>
-                                                            </div>
-                                                        </div>
 
-                                                        <div className="bg-gray-50 p-3 rounded-md text-sm">
-                                                            <span className="font-semibold text-gray-700 block mb-1">Motivo:</span>
-                                                            {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason)}
-                                                        </div>
-                                                        {apt.notes && (
-                                                            <div className="bg-yellow-50 p-3 rounded-md text-sm border border-yellow-100">
-                                                                <span className="font-semibold text-yellow-800 block mb-1">Notas:</span>
-                                                                {apt.notes}
+                                                                <div className="flex items-center gap-3 bg-blue-50/50 p-2 rounded-lg border border-blue-100 mb-2">
+                                                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                                                                        <Building2 className="w-4 h-4" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <span className="text-xs text-gray-500 block">Sede</span>
+                                                                        <span className="text-sm font-semibold text-[#1c334a]">
+                                                                            {hospitals.find(h => h.id === apt.hospitalId)?.name}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                                                        <User className="w-5 h-5" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="font-bold text-lg">{patient?.name}</div>
+                                                                        <div className="text-sm text-gray-500">{patient?.email}</div>
+                                                                        <div className="text-sm text-gray-500">{patient?.phone}</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="grid grid-cols-2 gap-4 text-sm mt-2">
+                                                                    <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded">
+                                                                        <Calendar className="w-4 h-4 text-[#1c334a]" />
+                                                                        <div>
+                                                                            <span className="block text-xs text-gray-400">Fecha</span>
+                                                                            {format(parseISO(apt.date), "PPP", { locale: es })}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded">
+                                                                        <Clock className="w-4 h-4 text-[#1c334a]" />
+                                                                        <div>
+                                                                            <span className="block text-xs text-gray-400">Hora</span>
+                                                                            {formatTime(apt.time)}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="bg-gray-50 p-3 rounded-md text-sm">
+                                                                    <span className="font-semibold text-gray-700 block mb-1">Motivo:</span>
+                                                                    {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason)}
+                                                                </div>
+                                                                {apt.notes && (
+                                                                    <div className="bg-yellow-50 p-3 rounded-md text-sm border border-yellow-100">
+                                                                        <span className="font-semibold text-yellow-800 block mb-1">Notas:</span>
+                                                                        {apt.notes}
+                                                                    </div>
+                                                                )}
+
+                                                                {apt.status !== 'blocked' && apt.status !== 'cancelled' && (
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+                                                                        onClick={() => startEditing(apt)}
+                                                                    >
+                                                                        <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
+                                                                    </Button>
+                                                                )}
                                                             </div>
                                                         )}
-
-                                                        {apt.status !== 'blocked' && apt.status !== 'cancelled' && (
-                                                            <Button
-                                                                variant="outline"
-                                                                className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
-                                                                onClick={() => startEditing(apt)}
-                                                            >
-                                                                <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
-                                                            </Button>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </DialogContent>
-                                        </Dialog>
+                                                    </DialogContent>
+                                                </Dialog>
+                                            </div>
+                                        </div>
                                     )
                                 })}
                             </div>
@@ -355,140 +358,145 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
                                     .map(apt => {
                                         const patient = patients.find(p => p.id === apt.patientId);
                                         return (
-                                            <Dialog key={apt.id} onOpenChange={(open) => !open && cancelEditing()}>
-                                                <DialogTrigger asChild>
-                                                    <div className="flex items-start gap-2.5 pb-2 border-b last:border-0 last:pb-0 cursor-pointer hover:bg-gray-50 p-2 -mx-2 rounded transition-colors">
-                                                        <div className="mt-1 bg-blue-50 p-1 rounded-full text-blue-600 shrink-0">
-                                                            <Clock className="w-2.5 h-2.5" />
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <p className="font-medium text-xs text-gray-800 truncate">{patient?.name}</p>
-                                                            <p className="text-[10px] text-gray-500 truncate">
-                                                                {format(parseISO(apt.date), "dd MMM", { locale: es })} • {formatTime(apt.time)}
-                                                            </p>
-                                                        </div>
+                                            <div key={apt.id} className="flex items-center justify-between pb-2 border-b last:border-0 last:pb-0 p-2 -mx-2 rounded hover:bg-gray-50 transition-colors">
+                                                <div className="flex items-start gap-2.5 min-w-0">
+                                                    <div className="mt-1 bg-blue-50 p-1 rounded-full text-blue-600 shrink-0">
+                                                        <Clock className="w-2.5 h-2.5" />
                                                     </div>
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        <DialogTitle>
-                                                            {isEditing ? 'Reprogramar Cita' : 'Detalles de la Cita'}
-                                                        </DialogTitle>
-                                                    </DialogHeader>
+                                                    <div className="min-w-0">
+                                                        <p className="font-medium text-xs text-gray-800 truncate">{patient?.name}</p>
+                                                        <p className="text-[10px] text-gray-500 truncate">
+                                                            {format(parseISO(apt.date), "dd MMM", { locale: es })} • {formatTime(apt.time)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <Dialog onOpenChange={(open) => !open && cancelEditing()}>
+                                                    <DialogTrigger asChild>
+                                                        <Button size="sm" className="h-6 text-[10px] px-2 bg-[#1c334a] text-white hover:bg-[#152738]">
+                                                            Modificar
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent>
+                                                        <DialogHeader>
+                                                            <DialogTitle>
+                                                                {isEditing ? 'Reprogramar Cita' : 'Detalles de la Cita'}
+                                                            </DialogTitle>
+                                                        </DialogHeader>
 
-                                                    {isEditing && selectedAppointmentId === apt.id ? (
-                                                        <div className="space-y-4 py-2">
-                                                            <div className="grid gap-2">
-                                                                <Label>Nueva Fecha</Label>
-                                                                <Input
-                                                                    type="date"
-                                                                    value={editDate}
-                                                                    onChange={(e) => setEditDate(e.target.value)}
-                                                                />
+                                                        {isEditing && selectedAppointmentId === apt.id ? (
+                                                            <div className="space-y-4 py-2">
+                                                                <div className="grid gap-2">
+                                                                    <Label>Nueva Fecha</Label>
+                                                                    <Input
+                                                                        type="date"
+                                                                        value={editDate}
+                                                                        onChange={(e) => setEditDate(e.target.value)}
+                                                                    />
+                                                                </div>
+                                                                <div className="grid gap-2">
+                                                                    <Label>Nuevo Horario</Label>
+                                                                    <select
+                                                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                                                        value={editTime}
+                                                                        onChange={(e) => setEditTime(e.target.value)}
+                                                                    >
+                                                                        <option value="" disabled>Seleccionar hora</option>
+                                                                        {getAvailableSlots(editDate, apt.hospitalId).map(slot => (
+                                                                            <option key={slot} value={slot}>{formatTime(slot)}</option>
+                                                                        ))}
+                                                                        <option value={apt.time}>{formatTime(apt.time)} (Actual)</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div className="flex justify-end gap-2 pt-2">
+                                                                    <Button variant="outline" size="sm" onClick={cancelEditing}>Cancelar</Button>
+                                                                    <Button size="sm" onClick={saveReschedule} className="bg-[#1c334a]">
+                                                                        <Check className="w-4 h-4 mr-2" /> Guardar Cambios
+                                                                    </Button>
+                                                                </div>
                                                             </div>
-                                                            <div className="grid gap-2">
-                                                                <Label>Nuevo Horario</Label>
-                                                                <select
-                                                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                                                                    value={editTime}
-                                                                    onChange={(e) => setEditTime(e.target.value)}
-                                                                >
-                                                                    <option value="" disabled>Seleccionar hora</option>
-                                                                    {getAvailableSlots(editDate, apt.hospitalId).map(slot => (
-                                                                        <option key={slot} value={slot}>{formatTime(slot)}</option>
-                                                                    ))}
-                                                                    <option value={apt.time}>{formatTime(apt.time)} (Actual)</option>
-                                                                </select>
-                                                            </div>
-                                                            <div className="flex justify-end gap-2 pt-2">
-                                                                <Button variant="outline" size="sm" onClick={cancelEditing}>Cancelar</Button>
-                                                                <Button size="sm" onClick={saveReschedule} className="bg-[#1c334a]">
-                                                                    <Check className="w-4 h-4 mr-2" /> Guardar Cambios
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="grid gap-4 py-4">
-                                                            <div className="full-w bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center justify-between">
-                                                                <span className="text-sm font-medium text-slate-700">Estado Actual:</span>
-                                                                <select
-                                                                    className="h-8 w-[180px] rounded-md border border-input bg-white px-3 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                                                                    value={apt.status}
-                                                                    onChange={(e) => handleStatusChange(apt.id, e)}
-                                                                    disabled={apt.status === 'blocked'}
-                                                                >
-                                                                    <option value="confirmed">Confirmada</option>
-                                                                    <option value="cancelled" className="text-red-600">Cancelar Cita</option>
-                                                                </select>
-                                                            </div>
+                                                        ) : (
+                                                            <div className="grid gap-4 py-4">
+                                                                <div className="full-w bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center justify-between">
+                                                                    <span className="text-sm font-medium text-slate-700">Estado Actual:</span>
+                                                                    <select
+                                                                        className="h-8 w-[180px] rounded-md border border-input bg-white px-3 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                                                        value={apt.status}
+                                                                        onChange={(e) => handleStatusChange(apt.id, e)}
+                                                                        disabled={apt.status === 'blocked'}
+                                                                    >
+                                                                        <option value="confirmed">Confirmada</option>
+                                                                        <option value="cancelled" className="text-red-600">Cancelar Cita</option>
+                                                                    </select>
+                                                                </div>
 
-                                                            <div className="flex items-center gap-3 bg-blue-50/50 p-2 rounded-lg border border-blue-100 mb-2">
-                                                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
-                                                                    <Building2 className="w-4 h-4" />
-                                                                </div>
-                                                                <div>
-                                                                    <span className="text-xs text-gray-500 block">Sede</span>
-                                                                    <span className="text-sm font-semibold text-[#1c334a]">
-                                                                        {hospitals.find(h => h.id === apt.hospitalId)?.name}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                                                                    <User className="w-5 h-5" />
-                                                                </div>
-                                                                <div>
-                                                                    <div className="font-bold text-lg">{patient?.name}</div>
-                                                                    <div className="text-sm text-gray-500">{patient?.email}</div>
-                                                                    <div className="text-sm text-gray-500">{patient?.phone}</div>
-                                                                </div>
-                                                            </div>
-                                                            <div className="grid grid-cols-2 gap-4 text-sm mt-2">
-                                                                <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded">
-                                                                    <Calendar className="w-4 h-4 text-[#1c334a]" />
+                                                                <div className="flex items-center gap-3 bg-blue-50/50 p-2 rounded-lg border border-blue-100 mb-2">
+                                                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                                                                        <Building2 className="w-4 h-4" />
+                                                                    </div>
                                                                     <div>
-                                                                        <span className="block text-xs text-gray-400">Fecha</span>
-                                                                        {format(parseISO(apt.date), "PPP", { locale: es })}
+                                                                        <span className="text-xs text-gray-500 block">Sede</span>
+                                                                        <span className="text-sm font-semibold text-[#1c334a]">
+                                                                            {hospitals.find(h => h.id === apt.hospitalId)?.name}
+                                                                        </span>
                                                                     </div>
                                                                 </div>
-                                                                <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded">
-                                                                    <Clock className="w-4 h-4 text-[#1c334a]" />
+
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                                                        <User className="w-5 h-5" />
+                                                                    </div>
                                                                     <div>
-                                                                        <span className="block text-xs text-gray-400">Hora</span>
-                                                                        {formatTime(apt.time)}
+                                                                        <div className="font-bold text-lg">{patient?.name}</div>
+                                                                        <div className="text-sm text-gray-500">{patient?.email}</div>
+                                                                        <div className="text-sm text-gray-500">{patient?.phone}</div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
+                                                                <div className="grid grid-cols-2 gap-4 text-sm mt-2">
+                                                                    <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded">
+                                                                        <Calendar className="w-4 h-4 text-[#1c334a]" />
+                                                                        <div>
+                                                                            <span className="block text-xs text-gray-400">Fecha</span>
+                                                                            {format(parseISO(apt.date), "PPP", { locale: es })}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded">
+                                                                        <Clock className="w-4 h-4 text-[#1c334a]" />
+                                                                        <div>
+                                                                            <span className="block text-xs text-gray-400">Hora</span>
+                                                                            {formatTime(apt.time)}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
 
-                                                            <div className="bg-gray-50 p-3 rounded-md text-sm">
-                                                                <span className="font-semibold text-gray-700 block mb-1">Motivo:</span>
-                                                                {apt.reason === 'specific-service' ? apt.serviceName : (
-                                                                    apt.reason === 'first-visit' ? 'Primera vez' :
-                                                                        apt.reason === 'follow-up' ? 'Seguimiento' :
-                                                                            apt.reason
+                                                                <div className="bg-gray-50 p-3 rounded-md text-sm">
+                                                                    <span className="font-semibold text-gray-700 block mb-1">Motivo:</span>
+                                                                    {apt.reason === 'specific-service' ? apt.serviceName : (
+                                                                        apt.reason === 'first-visit' ? 'Primera vez' :
+                                                                            apt.reason === 'follow-up' ? 'Seguimiento' :
+                                                                                apt.reason
+                                                                    )}
+                                                                </div>
+                                                                {apt.notes && (
+                                                                    <div className="bg-yellow-50 p-3 rounded-md text-sm border border-yellow-100">
+                                                                        <span className="font-semibold text-yellow-800 block mb-1">Notas:</span>
+                                                                        {apt.notes}
+                                                                    </div>
+                                                                )}
+
+                                                                {apt.status !== 'blocked' && apt.status !== 'cancelled' && (
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+                                                                        onClick={() => startEditing(apt)}
+                                                                    >
+                                                                        <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
+                                                                    </Button>
                                                                 )}
                                                             </div>
-                                                            {apt.notes && (
-                                                                <div className="bg-yellow-50 p-3 rounded-md text-sm border border-yellow-100">
-                                                                    <span className="font-semibold text-yellow-800 block mb-1">Notas:</span>
-                                                                    {apt.notes}
-                                                                </div>
-                                                            )}
-
-                                                            {apt.status !== 'blocked' && apt.status !== 'cancelled' && (
-                                                                <Button
-                                                                    variant="outline"
-                                                                    className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
-                                                                    onClick={() => startEditing(apt)}
-                                                                >
-                                                                    <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
-                                                                </Button>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </DialogContent>
-                                            </Dialog>
+                                                        )}
+                                                    </DialogContent>
+                                                </Dialog>
+                                            </div>
                                         )
                                     })
                                 }
