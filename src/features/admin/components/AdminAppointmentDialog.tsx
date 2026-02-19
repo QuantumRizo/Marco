@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+
 import { HOSPITAL_SCHEDULES, type Hospital } from "@/features/appointments/types";
 import { ArrowLeft, Building2 } from "lucide-react";
 
@@ -288,23 +288,12 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
                                 </div>
                             </div>
 
-                            <div className="bg-amber-50 border border-amber-200 rounded-md p-3 flex items-start gap-2">
-                                <div className="text-amber-500 mt-0.5">⚠️</div>
-                                <div className="text-sm text-amber-800">
-                                    <span className="font-semibold block">Recordatorio Importante:</span>
-                                    Recuerda completar los datos completos de historia clínica del paciente en la sección pacientes después de agendar.
-                                </div>
+                            <div className="text-sm text-gray-500 mt-2">
+                                <span className="font-semibold">Recordatorio Importante: </span>
+                                Recuerda completar los datos completos de historia clínica del paciente en la sección pacientes después de agendar.
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="admin-notes">Notas / Motivo</Label>
-                                <Textarea
-                                    id="admin-notes"
-                                    value={patient.notes}
-                                    onChange={(e) => handlePatientChange('notes', e.target.value)}
-                                    placeholder="Notas adicionales sobre el paciente o la cita..."
-                                />
-                            </div>
+
                         </div>
 
                         <div className="flex justify-end gap-3 pt-4">

@@ -43,8 +43,8 @@ export const BookingTypeDialog = ({ open, onOpenChange, onNewPatient, onExisting
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogContent className="sm:max-w-[500px] h-[80vh] flex flex-col p-0 gap-0">
-                <DialogHeader className="p-6 pb-2 shrink-0">
+            <DialogContent className="sm:max-w-[425px] flex flex-col p-0 gap-0">
+                <DialogHeader className="p-4 pb-2 shrink-0">
                     <DialogTitle className="flex items-center gap-2">
                         {view === 'search' && (
                             <Button variant="ghost" size="icon" className="h-6 w-6 mr-1 -ml-2" onClick={() => setView('options')}>
@@ -61,16 +61,16 @@ export const BookingTypeDialog = ({ open, onOpenChange, onNewPatient, onExisting
                 </DialogHeader>
 
                 {view === 'options' ? (
-                    <div className="grid grid-cols-2 gap-4 p-6 pt-2">
+                    <div className="grid grid-cols-2 gap-4 p-4 pt-2">
                         <button
                             onClick={() => setView('search')}
-                            className="flex flex-col items-center justify-center gap-4 p-6 rounded-xl border-2 border-dashed border-gray-200 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                            className="flex flex-col items-center justify-center gap-3 p-4 rounded-xl border-2 border-dashed border-gray-200 hover:border-primary/50 hover:bg-primary/5 transition-all group"
                         >
-                            <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                                <UserCheck className="w-8 h-8" />
+                            <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                                <UserCheck className="w-6 h-6" />
                             </div>
                             <div className="text-center space-y-1">
-                                <h3 className="font-semibold text-gray-900">Paciente Registrado</h3>
+                                <h3 className="font-semibold text-gray-900 text-sm">Paciente Registrado</h3>
                                 <p className="text-xs text-gray-500">Buscar en el directorio</p>
                             </div>
                         </button>
@@ -80,13 +80,13 @@ export const BookingTypeDialog = ({ open, onOpenChange, onNewPatient, onExisting
                                 handleOpenChange(false);
                                 onNewPatient();
                             }}
-                            className="flex flex-col items-center justify-center gap-4 p-6 rounded-xl border-2 border-dashed border-gray-200 hover:border-green-500/50 hover:bg-green-50 transition-all group"
+                            className="flex flex-col items-center justify-center gap-3 p-4 rounded-xl border-2 border-dashed border-gray-200 hover:border-green-500/50 hover:bg-green-50 transition-all group"
                         >
-                            <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
-                                <UserPlus className="w-8 h-8" />
+                            <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
+                                <UserPlus className="w-6 h-6" />
                             </div>
                             <div className="text-center space-y-1">
-                                <h3 className="font-semibold text-gray-900">Nuevo Paciente</h3>
+                                <h3 className="font-semibold text-gray-900 text-sm">Nuevo Paciente</h3>
                                 <p className="text-xs text-gray-500">Crear registro nuevo</p>
                             </div>
                         </button>
