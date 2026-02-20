@@ -180,7 +180,7 @@ export const BookingWizard = () => {
                         onSelectTime={setSelectedTime}
                         onNext={handleNext}
                         onBack={handleBack}
-                        allowedDays={selectedHospitalId ? HOSPITAL_SCHEDULES[selectedHospitalId]?.allowedDays : []}
+                        allowedDays={undefined}
                     />
                 )}
 
