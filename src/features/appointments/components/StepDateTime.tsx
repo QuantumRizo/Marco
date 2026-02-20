@@ -41,10 +41,10 @@ export const StepDateTime = ({
                             selected={date}
                             onSelect={onSelectDate}
                             disabled={(date: Date) => {
-                                const isPast = date < new Date() || date < new Date("1900-01-01");
-                                const isNotAllowedDay = allowedDays ? !allowedDays.includes(date.getDay()) : false;
-                                return isPast || isNotAllowedDay;
-                            }}
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    return date < today;
+}}
                             initialFocus
                             className="rounded-md"
                             locale={es}
