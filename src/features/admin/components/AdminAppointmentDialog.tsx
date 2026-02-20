@@ -251,9 +251,9 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
                                         onChange={(e) => {
                                             const dateVal = e.target.value;
                                             if (dateVal) {
-                                                const [year, month, day] = dateVal.split('-').map(Number);
-                                                const dateObj = new Date(year, month - 1, day);
-                                                const dayOfWeek = dateObj.getDay();
+                                                //const [year, month, day] = dateVal.split('-').map(Number);
+                                                //const dateObj = new Date(year, month - 1, day);
+                                                //const dayOfWeek = dateObj.getDay();
                                                 
                                             }
                                             handleAppointmentChange('date', dateVal);
