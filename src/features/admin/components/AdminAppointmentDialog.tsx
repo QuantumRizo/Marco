@@ -254,14 +254,7 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
                                                 const [year, month, day] = dateVal.split('-').map(Number);
                                                 const dateObj = new Date(year, month - 1, day);
                                                 const dayOfWeek = dateObj.getDay();
-                                                const allowedDays = HOSPITAL_SCHEDULES[bookingHospitalId]?.allowedDays;
-
-                                                if (allowedDays && !allowedDays.includes(dayOfWeek)) {
-                                                    alert(`Este hospital solo atiende los días: ${allowedDays.map(d => ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][d]).join(', ')
-                                                        }. Por favor seleccione una fecha válida.`);
-                                                    handleAppointmentChange('date', ''); // Clear invalid date
-                                                    return;
-                                                }
+                                                
                                             }
                                             handleAppointmentChange('date', dateVal);
                                         }}
