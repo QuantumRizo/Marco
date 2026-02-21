@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Appointment, Patient } from '../types';
-import { HOSPITALS, SERVICES, HOSPITAL_SCHEDULES } from '../types';
+import { HOSPITALS, SERVICES /*, HOSPITAL_SCHEDULES */ } from '../types';
 
 const APP_ID = 'marco'; // Hardcoded for this specific application
 
@@ -10,7 +10,7 @@ export const useAppointments = () => {
     const [patients, setPatients] = useState<Patient[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             setLoading(true);
             // Fetch Appointments - FILTERED BY APP_ID
@@ -76,13 +76,29 @@ export const useAppointments = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []); // stable reference — supabase and APP_ID are module-level constants
 
     useEffect(() => {
         fetchData();
 
-        // Optional: Realtime subscription could go here
-    }, []);
+        const channel = supabase
+            .channel('realtime:appointments')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'appointments', filter: `app_id=eq.${APP_ID}` },
+                () => { fetchData(); }
+            )
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'patients', filter: `app_id=eq.${APP_ID}` },
+                () => { fetchData(); }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [fetchData]); // fetchData is stable (useCallback + empty deps) — safe to include
 
     const saveAppointment = async (appointmentData: Partial<Appointment>, patientData: Patient) => {
         try {
@@ -148,22 +164,38 @@ export const useAppointments = () => {
                 console.log("saveAppointment: New patient created:", patientId);
             }
 
-            // 2. Create Appointment
-            console.log("saveAppointment: Creating appointment record...");
+            // 2. Conflict Validation (Double booking prevention)
+            console.log("saveAppointment: Checking for conflicts...");
             // Combine Date + Time into ISO string for DB
             const isoDateTime = `${appointmentData.date}T${appointmentData.time}:00`;
 
+            const { data: conflictAppointments, error: conflictError } = await supabase
+                .from('appointments')
+                .select('id')
+                .eq('app_id', APP_ID)
+                .eq('date', isoDateTime)
+                .neq('status', 'cancelled');
+
+            if (conflictError) throw conflictError;
+
+            if (conflictAppointments && conflictAppointments.length > 0) {
+                console.warn("saveAppointment: Conflict detected!");
+                throw new Error("Lo sentimos, este horario acaba de ser ocupado. Por favor seleccione otro.");
+            }
+
+            // 3. Create Appointment
+            console.log("saveAppointment: Creating appointment record...");
             const { error: appointmentError } = await supabase
                 .from('appointments')
                 .insert([{
                     patient_id: patientId,
                     hospital_id: appointmentData.hospitalId,
-                    service_id: appointmentData.serviceId || null, // Ensure null if undefined
+                    service_id: appointmentData.serviceId || null,
                     reason: appointmentData.reason,
                     date: isoDateTime,
                     status: 'confirmed',
-                    notes: appointmentData.notes, // Saving the combined notes here
-                    app_id: APP_ID // APP_ID ADDED
+                    notes: appointmentData.notes,
+                    app_id: APP_ID
                 }]);
 
             if (appointmentError) {
@@ -199,33 +231,32 @@ export const useAppointments = () => {
         }
     };
 
-    const getAvailableSlots = (date: string, hospitalId: string) => {
-        // Find hospital schedule
+    const getAvailableSlots = (date: string, _hospitalId: string) => {
+        /* Commented out as part of allowing any day scheduling
         const schedule = HOSPITAL_SCHEDULES[hospitalId];
-
-        // Parse date to check day of week
-        // date string is YYYY-MM-DD
         const [year, month, day] = date.split('-').map(Number);
-        // helper to get day of week for YYYY-MM-DD safely
         const dateObj = new Date(year, month - 1, day);
         const dayOfWeek = dateObj.getDay(); // 0-6
 
-        // If day not allowed for this hospital, return empty
         if (!schedule || !schedule.allowedDays.includes(dayOfWeek)) {
             return [];
         }
+        */
 
         const slots: string[] = [];
         const startHour = 9;
         const endHour = 20.5; // 8 PM inclusive
         const interval = 30;
 
-        // Existing appointments for this day and hospital from STATE
+        // Existing appointments for this day (GLOBAL across hospitals) from STATE
         const existingForDay = appointments.filter(a =>
             a.date === date &&
-            a.hospitalId === hospitalId &&
             a.status !== 'cancelled'
         );
+
+        // Calculate now and parse date parts once (local timezone — browser = CDMX)
+        const now = new Date();
+        const [year, month, day] = date.split('-').map(Number);
 
         let currentMinute = startHour * 60;
         const endMinute = endHour * 60;
@@ -233,17 +264,21 @@ export const useAppointments = () => {
         while (currentMinute < endMinute) {
             const h = Math.floor(currentMinute / 60);
             const m = currentMinute % 60;
-            // Deterministic HH:MM format
             const timeString = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 
-            // Check if blocked
-            const isBlocked = existingForDay.some(a => a.time === timeString);
+            // Skip slots in the past (compare local datetimes — no UTC conversion needed)
+            const slotDateTime = new Date(year, month - 1, day, h, m);
+            if (slotDateTime <= now) {
+                currentMinute += interval;
+                continue;
+            }
 
+            // Check if already booked/blocked
+            const isBlocked = existingForDay.some(a => a.time === timeString);
             if (!isBlocked) {
                 slots.push(timeString);
             }
 
-            // Add 30 minutes
             currentMinute += interval;
         }
 
@@ -327,6 +362,19 @@ export const useAppointments = () => {
 
             const isoDateTime = `${date}T${time}:00`;
 
+            // Conflict Validation (GLOBAL)
+            const { data: conflictAppointments, error: conflictError } = await supabase
+                .from('appointments')
+                .select('id')
+                .eq('app_id', APP_ID)
+                .eq('date', isoDateTime)
+                .neq('status', 'cancelled');
+
+            if (conflictError) throw conflictError;
+            if (conflictAppointments && conflictAppointments.length > 0) {
+                throw new Error("Este horario ya está ocupado.");
+            }
+
             const { error } = await supabase
                 .from('appointments')
                 .insert([{
@@ -336,7 +384,7 @@ export const useAppointments = () => {
                     status: 'blocked',
                     date: isoDateTime,
                     notes: 'Horario Bloqueado Manualmente',
-                    app_id: APP_ID // APP_ID ADDED
+                    app_id: APP_ID
                 }]);
 
             if (error) throw error;
@@ -365,32 +413,30 @@ export const useAppointments = () => {
 
     const updateAppointment = async (appointmentId: string, updates: Partial<Appointment>) => {
         try {
-            // If date/time is updated, we need to construct the ISO string
-            let updatePayload: any = { ...updates };
-
-            if (updates.date && updates.time) {
-                updatePayload.date = `${updates.date}T${updates.time}:00`;
-                delete updatePayload.time; // Remove UI-only time field
-            } else if (updates.date) {
-                // Changing date but keeping time? Need to fetch original time.
-                // For simplicity, we assume generic update passes both if datetime changes.
-                // Or we can just trust the caller passes valid 'date' column string if they mapped it back.
-                // But our mapper splits them. 
-                // Let's assume the caller will pass 'date' as YYYY-MM-DD and 'time' as HH:MM if they want to reschedule.
-                // Actually the DB column is 'date' (timestamp).
-            }
-
-            // Adjust payload for DB
-            // updates comes with camelCase, we might need snake_case if using exact row update
-            // But our 'saveAppointment' does manual mapping. 
-            // Let's handle just status/notes/date/time for simplified logic
+            // Adjust payload for DB (camelCase → snake_case)
             const dbUpdates: any = {};
             if (updates.status) dbUpdates.status = updates.status;
             if (updates.notes) dbUpdates.notes = updates.notes;
             if (updates.serviceId) dbUpdates.service_id = updates.serviceId;
             if (updates.clinicalData) dbUpdates.clinical_data = updates.clinicalData;
             if (updates.date && updates.time) {
-                dbUpdates.date = `${updates.date}T${updates.time}:00`;
+                const newIsoDateTime = `${updates.date}T${updates.time}:00`;
+
+                // Conflict Validation (GLOBAL)
+                const { data: conflictAppointments, error: conflictError } = await supabase
+                    .from('appointments')
+                    .select('id')
+                    .eq('app_id', APP_ID)
+                    .eq('date', newIsoDateTime)
+                    .neq('id', appointmentId) // Exclude current appointment
+                    .neq('status', 'cancelled');
+
+                if (conflictError) throw conflictError;
+                if (conflictAppointments && conflictAppointments.length > 0) {
+                    throw new Error("Este horario ya está ocupado.");
+                }
+
+                dbUpdates.date = newIsoDateTime;
             }
 
             const { error } = await supabase

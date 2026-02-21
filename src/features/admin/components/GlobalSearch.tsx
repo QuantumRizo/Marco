@@ -130,7 +130,7 @@ export const GlobalSearch = ({ onSelectPatient }: GlobalSearchProps) => {
                                                 <div className="font-medium text-[#1c334a]">
                                                     {format(parseISO(appt.date), "dd MMM yyyy", { locale: es })}
                                                 </div>
-                                                <div className="text-xs text-gray-500">{appt.serviceName || (appt.reason === 'first-visit' ? 'Primera vez' : appt.reason)}</div>
+                                                <div className="text-xs text-gray-500">{appt.serviceName || (appt.reason === 'first-visit' ? 'Primera vez' : appt.reason === 'follow-up' ? 'Seguimiento' : appt.reason)}</div>
                                             </div>
                                             <div className={`text-xs px-2 py-1 rounded-full capitalize ${appt.status === 'confirmed' ? 'bg-green-100 text-green-700' :
                                                 appt.status === 'finished' ? 'bg-gray-100 text-gray-700' :

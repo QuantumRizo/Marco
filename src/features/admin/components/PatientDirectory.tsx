@@ -12,6 +12,8 @@ import { format, isAfter, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Search, MapPin, Phone, Mail, Trash2, Calendar, ArrowRight, User, FileText, UserPlus, CalendarPlus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { toast } from 'sonner';
 
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -20,7 +22,7 @@ interface PatientDirectoryProps {
 }
 
 export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) => {
-    const { hospitals, appointments, patients, deletePatient, updatePatient, addPatient, loading } = useAppointments();
+    const { appointments, patients, hospitals, updatePatient, deletePatient, deleteAppointment, addPatient, loading } = useAppointments();
 
     const formatTime = (timeStr: string) => {
         if (!timeStr) return '';
@@ -36,6 +38,10 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
     const [selectedHospitalFilter, setSelectedHospitalFilter] = useState<string>('all');
+
+    // Delete Confirmation State
+    const [patientToDelete, setPatientToDelete] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // --- Logic: Patients per Hospital or Global ---
     const filteredPatients = useMemo(() => {
@@ -128,12 +134,21 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
 
     const handleDeletePatient = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (window.confirm("¡ADVERTENCIA!\n\nEsta acción eliminará permanentemente al paciente y TODAS sus citas históricas.\n\n¿Estás seguro de continuar?")) {
-            try {
-                await deletePatient(id);
-            } catch (error: any) {
-                alert("Error al eliminar paciente: " + (error.message || JSON.stringify(error)));
-            }
+        setPatientToDelete(id);
+    };
+
+    const confirmDeletePatient = async () => {
+        if (!patientToDelete) return;
+
+        setIsDeleting(true);
+        try {
+            await deletePatient(patientToDelete);
+            toast.success("Paciente eliminado correctamente");
+            setPatientToDelete(null);
+        } catch (error: any) {
+            toast.error("Error al eliminar paciente: " + (error.message || "Error desconocido"));
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -324,6 +339,7 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
                                                                             appointments={appointments}
                                                                             hospitals={hospitals}
                                                                             onUpdatePatient={updatePatient}
+                                                                            onDeleteAppointment={deleteAppointment}
                                                                         />
                                                                     )}
                                                                 </DialogContent>
@@ -412,6 +428,7 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
                                                                 appointments={appointments}
                                                                 hospitals={hospitals}
                                                                 onUpdatePatient={updatePatient}
+                                                                onDeleteAppointment={deleteAppointment}
                                                             />
                                                         )}
                                                     </DialogContent>
@@ -441,6 +458,16 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
                 onBookAppointment={(data: any) => {
                     if (onBookAppointment) onBookAppointment(data);
                 }}
+            />
+
+            <ConfirmDialog
+                open={!!patientToDelete}
+                onOpenChange={(open) => !open && setPatientToDelete(null)}
+                title="¿Eliminar Paciente?"
+                description="Esta acción eliminará permanentemente al paciente y TODAS sus citas históricas. Esta acción no se puede deshacer."
+                confirmText="Eliminar Paciente"
+                onConfirm={confirmDeletePatient}
+                isLoading={isDeleting}
             />
         </div >
     );

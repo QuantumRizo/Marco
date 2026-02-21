@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useAppointments } from '../../appointments/hooks/useAppointments';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Clock, User, Calendar, Edit2, Check, Building2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, User, Calendar, Edit2, Check, Building2, Trash2 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import {
     format,
     startOfMonth,
@@ -39,7 +40,7 @@ interface Appointment {
 }
 
 export const AdminCalendar = (_props: AdminCalendarProps) => {
-    const { appointments, patients, hospitals, updateAppointmentStatus, updateAppointment, getAvailableSlots } = useAppointments();
+    const { appointments, patients, hospitals, updateAppointment, getAvailableSlots, deleteAppointment } = useAppointments();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
@@ -52,11 +53,17 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
         return format(date, 'h:mm a', { locale: es });
     };
 
-    // Edit Mode State
+    // Delete confirmation state
+    const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
     const [isEditing, setIsEditing] = useState(false);
     const [editDate, setEditDate] = useState("");
     const [editTime, setEditTime] = useState("");
     const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
+
+    // For opening appointment detail from the day-view dialog
+    const [selectedDetailApt, setSelectedDetailApt] = useState<typeof appointments[0] | null>(null);
 
     // Calendar generation
     const monthStart = startOfMonth(currentDate);
@@ -80,12 +87,21 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
         ).sort((a, b) => a.time.localeCompare(b.time));
     };
 
-    const handleStatusChange = async (apptId: string, event: React.ChangeEvent<HTMLSelectElement>) => {
-        const newStatus = event.target.value;
+
+    const handleDeleteAppointment = (apptId: string) => {
+        setAppointmentToDelete(apptId);
+    };
+
+    const confirmDeleteAppointment = async () => {
+        if (!appointmentToDelete) return;
+        setIsDeleting(true);
         try {
-            await updateAppointmentStatus(apptId, newStatus);
+            await deleteAppointment(appointmentToDelete);
+            setAppointmentToDelete(null);
         } catch (e) {
-            alert('Error al actualizar estado');
+            alert('Error al eliminar la cita');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -205,16 +221,16 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                     <DialogTrigger asChild>
                                                         <button
                                                             className={`
-                                                                text-[10px] text-left px-1.5 py-1 rounded truncate w-full border-l-2 font-medium transition-all hover:brightness-95
+                                                                text-[10px] text-left px-1.5 py-1 rounded w-full border-l-2 font-medium transition-all hover:brightness-95
                                                                 ${getStatusColor(apt.status)}
                                                             `}
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
-                                                            <div className="flex items-center gap-1">
-                                                                <span className="text-[9px] font-bold bg-[#1c334a]/10 text-[#1c334a] px-1 rounded uppercase">
+                                                            <div className="flex items-center gap-1 flex-wrap">
+                                                                <span className="text-[9px] font-bold bg-[#1c334a]/10 text-[#1c334a] px-1 rounded uppercase shrink-0">
                                                                     {hospitals.find(h => h.id === apt.hospitalId)?.name.substring(0, 3)}
                                                                 </span>
-                                                                {formatTime(apt.time)} - {patient?.name.split(' ')[0] || 'Cita'}
+                                                                <span className="line-clamp-1 break-all">{formatTime(apt.time)} - {patient?.name.split(' ')[0] || 'Cita'}</span>
                                                             </div>
                                                         </button>
                                                     </DialogTrigger>
@@ -232,6 +248,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                     <Input
                                                                         type="date"
                                                                         value={editDate}
+                                                                        min={(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })()}
                                                                         onChange={(e) => setEditDate(e.target.value)}
                                                                     />
                                                                 </div>
@@ -258,19 +275,6 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                             </div>
                                                         ) : (
                                                             <div className="grid gap-4 py-4">
-                                                                {/* Status Selector */}
-                                                                <div className="full-w bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center justify-between">
-                                                                    <span className="text-sm font-medium text-slate-700">Estado Actual:</span>
-                                                                    <select
-                                                                        className="h-8 w-[180px] rounded-md border border-input bg-white px-3 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                                                                        value={apt.status}
-                                                                        onChange={(e) => handleStatusChange(apt.id, e)}
-                                                                        disabled={apt.status === 'blocked'}
-                                                                    >
-                                                                        <option value="confirmed">Confirmada</option>
-                                                                        <option value="cancelled" className="text-red-600">Cancelar Cita</option>
-                                                                    </select>
-                                                                </div>
 
                                                                 <div className="flex items-center gap-3 bg-blue-50/50 p-2 rounded-lg border border-blue-100 mb-2">
                                                                     <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
@@ -313,7 +317,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
 
                                                                 <div className="bg-gray-50 p-3 rounded-md text-sm">
                                                                     <span className="font-semibold text-gray-700 block mb-1">Motivo:</span>
-                                                                    {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason)}
+                                                                    {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason === 'follow-up' ? 'Seguimiento' : apt.reason)}
                                                                 </div>
                                                                 {apt.notes && (
                                                                     <div className="bg-yellow-50 p-3 rounded-md text-sm border border-yellow-100">
@@ -323,7 +327,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                 )}
 
                                                                 {/* Edit Button */}
-                                                                {apt.status !== 'blocked' && apt.status !== 'cancelled' && (
+                                                                {apt.status !== 'blocked' && (
                                                                     <Button
                                                                         variant="outline"
                                                                         className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
@@ -332,6 +336,13 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                         <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
                                                                     </Button>
                                                                 )}
+                                                                <Button
+                                                                    variant="outline"
+                                                                    className="w-full mt-2 border-red-200 text-red-600 hover:bg-red-50"
+                                                                    onClick={() => handleDeleteAppointment(apt.id)}
+                                                                >
+                                                                    <Trash2 className="w-4 h-4 mr-2" /> Eliminar Cita
+                                                                </Button>
                                                             </div>
                                                         )}
                                                     </DialogContent>
@@ -372,8 +383,8 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                         key={apt.id}
                                         className="p-3 flex gap-3 items-center hover:bg-gray-50 transition-colors cursor-pointer border rounded-lg active:bg-gray-100"
                                         onClick={() => {
-                                            setSelectedDay(null); // Close day view
-                                            startEditing(apt); // Open edit/detail view
+                                            setSelectedDay(null);
+                                            setTimeout(() => setSelectedDetailApt(apt), 150);
                                         }}
                                     >
                                         <div className="flex flex-col items-center justify-center min-w-[3.5rem] py-1 bg-gray-100 rounded text-gray-700 font-bold text-sm">
@@ -390,7 +401,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                             </div>
                                             <div className="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
                                                 <span className="truncate max-w-[150px]">
-                                                    {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason)}
+                                                    {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason === 'follow-up' ? 'Seguimiento' : apt.reason)}
                                                 </span>
                                                 <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                                                 <Badge variant="outline" className={`text-[9px] h-4 px-1 ${getStatusColor(apt.status)} border-0`}>
@@ -404,6 +415,129 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                         </div>
                     </DialogContent>
                 </Dialog>
+
+                {/* Detail Dialog — opened from day-view list */}
+                {selectedDetailApt && (() => {
+                    const apt = selectedDetailApt;
+                    const patient = patients.find(p => p.id === apt.patientId);
+                    return (
+                        <Dialog
+                            open={!!selectedDetailApt}
+                            onOpenChange={(open) => {
+                                if (!open) {
+                                    setSelectedDetailApt(null);
+                                    cancelEditing();
+                                }
+                            }}
+                        >
+                            <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        {isEditing && selectedAppointmentId === apt.id ? 'Reprogramar Cita' : 'Detalles de la Cita'}
+                                    </DialogTitle>
+                                </DialogHeader>
+
+                                {isEditing && selectedAppointmentId === apt.id ? (
+                                    <div className="space-y-4 py-2">
+                                        <div className="grid gap-2">
+                                            <Label>Nueva Fecha</Label>
+                                            <Input type="date" value={editDate} min={(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })()} onChange={(e) => setEditDate(e.target.value)} />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label>Nuevo Horario</Label>
+                                            <select
+                                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                                                value={editTime}
+                                                onChange={(e) => setEditTime(e.target.value)}
+                                            >
+                                                <option value="" disabled>Seleccionar hora</option>
+                                                {getAvailableSlots(editDate, apt.hospitalId).map(slot => (
+                                                    <option key={slot} value={slot}>{formatTime(slot)}</option>
+                                                ))}
+                                                <option value={apt.time}>{formatTime(apt.time)} (Actual)</option>
+                                            </select>
+                                        </div>
+                                        <div className="flex justify-end gap-2 pt-2">
+                                            <Button variant="outline" size="sm" onClick={cancelEditing}>Cancelar</Button>
+                                            <Button size="sm" onClick={saveReschedule} className="bg-[#1c334a]">
+                                                <Check className="w-4 h-4 mr-2" /> Guardar Cambios
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="grid gap-4 py-4">
+                                        <div className="flex items-center gap-3 bg-blue-50/50 p-2 rounded-lg border border-blue-100 mb-2">
+                                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                                                <Building2 className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <span className="text-xs text-gray-500 block">Sede</span>
+                                                <span className="text-sm font-semibold text-[#1c334a]">
+                                                    {hospitals.find(h => h.id === apt.hospitalId)?.name}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                                <User className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-lg">{patient?.name}</div>
+                                                <div className="text-sm text-gray-500">{patient?.email}</div>
+                                                <div className="text-sm text-gray-500">{patient?.phone}</div>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4 text-sm mt-2">
+                                            <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded">
+                                                <Calendar className="w-4 h-4 text-[#1c334a]" />
+                                                <div>
+                                                    <span className="block text-xs text-gray-400">Fecha</span>
+                                                    {format(parseISO(apt.date), 'PPP', { locale: es })}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded">
+                                                <Clock className="w-4 h-4 text-[#1c334a]" />
+                                                <div>
+                                                    <span className="block text-xs text-gray-400">Hora</span>
+                                                    {formatTime(apt.time)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="bg-gray-50 p-3 rounded-md text-sm">
+                                            <span className="font-semibold text-gray-700 block mb-1">Motivo:</span>
+                                            {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason === 'follow-up' ? 'Seguimiento' : apt.reason)}
+                                        </div>
+                                        {apt.notes && (
+                                            <div className="bg-yellow-50 p-3 rounded-md text-sm border border-yellow-100">
+                                                <span className="font-semibold text-yellow-800 block mb-1">Notas:</span>
+                                                {apt.notes}
+                                            </div>
+                                        )}
+                                        {apt.status !== 'blocked' && (
+                                            <Button
+                                                variant="outline"
+                                                className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+                                                onClick={() => startEditing(apt)}
+                                            >
+                                                <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
+                                            </Button>
+                                        )}
+                                        <Button
+                                            variant="outline"
+                                            className="w-full mt-2 border-red-200 text-red-600 hover:bg-red-50"
+                                            onClick={() => {
+                                                setSelectedDetailApt(null);
+                                                handleDeleteAppointment(apt.id);
+                                            }}
+                                        >
+                                            <Trash2 className="w-4 h-4 mr-2" /> Eliminar Cita
+                                        </Button>
+                                    </div>
+                                )}
+                            </DialogContent>
+                        </Dialog>
+                    );
+                })()}
 
                 {/* Mobile List View */}
                 <div className="md:hidden space-y-6 pb-20">
@@ -464,7 +598,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                     </div>
                                                                     <div className="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
                                                                         <span className="truncate max-w-[150px]">
-                                                                            {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason)}
+                                                                            {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason === 'follow-up' ? 'Seguimiento' : apt.reason)}
                                                                         </span>
                                                                         <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                                                                         <Badge variant="outline" className={`text-[9px] h-4 px-1 ${getStatusColor(apt.status)} border-0`}>
@@ -490,7 +624,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                     {/* ... reuse existing edit form logic ... */}
                                                                     <div className="grid gap-2">
                                                                         <Label>Nueva Fecha</Label>
-                                                                        <Input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
+                                                                        <Input type="date" value={editDate} min={(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })()} onChange={(e) => setEditDate(e.target.value)} />
                                                                     </div>
                                                                     <div className="grid gap-2">
                                                                         <Label>Nuevo Horario</Label>
@@ -516,21 +650,6 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                             ) : (
                                                                 <div className="grid gap-4 py-2">
                                                                     {/* ... reuse existing view detail logic ... */}
-                                                                    <div className="full-w bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center justify-between">
-                                                                        <span className="text-sm font-medium text-slate-700">Estado:</span>
-                                                                        <select
-                                                                            className="h-8 w-auto rounded-md border border-input bg-white px-2 py-1 text-xs"
-                                                                            value={apt.status}
-                                                                            onChange={(e) => handleStatusChange(apt.id, e)}
-                                                                            disabled={apt.status === 'blocked'}
-                                                                        >
-                                                                            <option value="confirmed">Confirmada</option>
-                                                                            <option value="waiting_room">En Sala</option>
-                                                                            <option value="in_progress">En Consulta</option>
-                                                                            <option value="finished">Finalizada</option>
-                                                                            <option value="cancelled">Cancelar</option>
-                                                                        </select>
-                                                                    </div>
 
                                                                     <div className="flex items-center gap-3 bg-blue-50/50 p-2 rounded-lg border border-blue-100 mb-2">
                                                                         <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
@@ -556,10 +675,10 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
 
                                                                     <div className="bg-gray-50 p-3 rounded-md text-sm">
                                                                         <span className="font-semibold text-gray-700 block mb-1">Motivo:</span>
-                                                                        {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason)}
+                                                                        {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason === 'follow-up' ? 'Seguimiento' : apt.reason)}
                                                                     </div>
 
-                                                                    {apt.status !== 'blocked' && apt.status !== 'cancelled' && (
+                                                                    {apt.status !== 'blocked' && (
                                                                         <Button
                                                                             variant="outline"
                                                                             className="w-full mt-2"
@@ -568,6 +687,13 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                             <Edit2 className="w-4 h-4 mr-2" /> Reprogramar
                                                                         </Button>
                                                                     )}
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        className="w-full mt-2 border-red-200 text-red-600 hover:bg-red-50"
+                                                                        onClick={() => handleDeleteAppointment(apt.id)}
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4 mr-2" /> Eliminar Cita
+                                                                    </Button>
                                                                 </div>
                                                             )}
                                                         </DialogContent>
@@ -583,6 +709,16 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                 </div>
 
             </CardContent>
+
+            <ConfirmDialog
+                open={!!appointmentToDelete}
+                onOpenChange={(open) => !open && setAppointmentToDelete(null)}
+                title="¿Eliminar Cita?"
+                description="Esta acción eliminará permanentemente la cita. No se puede deshacer."
+                confirmText="Eliminar Cita"
+                onConfirm={confirmDeleteAppointment}
+                isLoading={isDeleting}
+            />
         </Card>
     );
 };

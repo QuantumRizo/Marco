@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppointments } from '../../appointments/hooks/useAppointments';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,7 +16,7 @@ import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
 export const AdminDashboard = () => {
-    const { hospitals, blockSlot, saveAppointment, addPatient } = useAppointments();
+    const { hospitals, blockSlot, saveAppointment, addPatient, getAvailableSlots, patients } = useAppointments();
 
     // Helper helper
     const formatTime = (timeStr: string) => {
@@ -28,8 +28,15 @@ export const AdminDashboard = () => {
         return new Intl.DateTimeFormat('es-MX', { hour: 'numeric', minute: '2-digit', hour12: true }).format(date);
     };
 
-    // Local state for Blocking Dialog since there is no global hospital anymore
-    const [blockHospitalId, setBlockHospitalId] = useState(hospitals[0]?.id || '');
+    // Local state for Blocking Dialog
+    const [blockHospitalId, setBlockHospitalId] = useState('');
+
+    // Set default hospital once hospitals are loaded
+    useEffect(() => {
+        if (hospitals.length > 0 && !blockHospitalId) {
+            setBlockHospitalId(hospitals[0].id);
+        }
+    }, [hospitals]);
 
     const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
     const [isAppointmentDialogOpen, setIsAppointmentDialogOpen] = useState(false);
@@ -58,9 +65,8 @@ export const AdminDashboard = () => {
             setBlockDate('');
             setBlockTime('');
             setIsBlockDialogOpen(false);
-        } catch (error) {
-            console.error("Failed to block", error);
-            alert("Error al bloquear horario");
+        } catch (error: any) {
+            alert(error?.message || "Error al bloquear horario");
         } finally {
             setIsBlocking(false);
         }
@@ -156,17 +162,12 @@ export const AdminDashboard = () => {
                                                         onChange={(e) => setBlockTime(e.target.value)}
                                                     >
                                                         <option value="">Seleccionar hora...</option>
-                                                        {Array.from({ length: 12 }).map((_, i) => {
-                                                            const hour = 9 + i;
-                                                            const time = `${hour.toString().padStart(2, '0')}:00`;
-                                                            const time30 = `${hour.toString().padStart(2, '0')}:30`;
-                                                            return (
-                                                                <>
-                                                                    <option key={time} value={time}>{formatTime(time)}</option>
-                                                                    <option key={time30} value={time30}>{formatTime(time30)}</option>
-                                                                </>
-                                                            );
-                                                        })}
+                                                        {(blockDate && blockHospitalId)
+                                                            ? getAvailableSlots(blockDate, blockHospitalId).map(slot => (
+                                                                <option key={slot} value={slot}>{formatTime(slot)}</option>
+                                                            ))
+                                                            : <option disabled>Seleccione una fecha primero</option>
+                                                        }
                                                     </select>
                                                 </div>
                                                 <Button onClick={handleBlockSlot} disabled={isBlocking || !blockDate || !blockTime || !blockHospitalId} className="bg-red-600 hover:bg-red-700">
@@ -208,6 +209,7 @@ export const AdminDashboard = () => {
                                 <AdminAppointmentDialog
                                     hospitals={hospitals}
                                     onSave={saveAppointment}
+                                    getAvailableSlots={getAvailableSlots}
                                     open={isAppointmentDialogOpen}
                                     onOpenChange={(val) => {
                                         setIsAppointmentDialogOpen(val);
@@ -219,6 +221,7 @@ export const AdminDashboard = () => {
                                 <BookingTypeDialog
                                     open={isBookingTypeDialogOpen}
                                     onOpenChange={setIsBookingTypeDialogOpen}
+                                    patients={patients}
                                     onNewPatient={() => {
                                         setIsBookingTypeDialogOpen(false);
                                         setIsAddPatientDialogOpen(true);
@@ -229,7 +232,7 @@ export const AdminDashboard = () => {
                                             name: patient.name,
                                             email: patient.email,
                                             phone: patient.phone,
-                                            notes: '' // Or fetch notes if available
+                                            notes: ''
                                         });
                                         setIsAppointmentDialogOpen(true);
                                     }}

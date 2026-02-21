@@ -12,10 +12,11 @@ interface AdminAppointmentDialogProps {
     onSave: (appointmentData: any, patientData: any) => Promise<boolean>;
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    getAvailableSlots: (date: string, hospitalId: string) => string[];
     initialPatientData?: { name: string, email: string, phone: string, notes?: string } | null;
 }
 
-export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, initialPatientData }: AdminAppointmentDialogProps) => {
+export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, getAvailableSlots, initialPatientData }: AdminAppointmentDialogProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Helper helper
@@ -237,27 +238,23 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="admin-date">Fecha *</Label>
-                                    <div className="text-xs text-blue-600 font-medium mb-1">
-                                        Días disponibles para este hospital: {
+                                    <div className="text-[10px] text-blue-600 font-medium mb-1 leading-tight">
+                                        Días habituales: {
                                             HOSPITAL_SCHEDULES[bookingHospitalId]?.allowedDays
-                                                .map(d => ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][d])
+                                                .map(d => ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][d])
                                                 .join(', ') || 'Consultar Horario'
                                         }
+                                        <br />
+                                        <span className="text-amber-600 font-semibold">
+                                            * Si agenda fuera de estos días, favor de confirmar con el Dr. Marco.
+                                        </span>
                                     </div>
                                     <Input
                                         id="admin-date"
                                         type="date"
                                         value={appointment.date}
-                                        onChange={(e) => {
-                                            const dateVal = e.target.value;
-                                            if (dateVal) {
-                                                //const [year, month, day] = dateVal.split('-').map(Number);
-                                                //const dateObj = new Date(year, month - 1, day);
-                                                //const dayOfWeek = dateObj.getDay();
-                                                
-                                            }
-                                            handleAppointmentChange('date', dateVal);
-                                        }}
+                                        min={(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })()}
+                                        onChange={(e) => handleAppointmentChange('date', e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -269,14 +266,13 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
                                         onChange={(e) => handleAppointmentChange('time', e.target.value)}
                                     >
                                         <option value="">Seleccionar hora...</option>
-                                        {Array.from({ length: 23 }).map((_, i) => { // 9:00 to 20:00 every 30 mins
-                                            const startHour = 9;
-                                            const totalMinutes = i * 30;
-                                            const hour = startHour + Math.floor(totalMinutes / 60);
-                                            const minutes = totalMinutes % 60;
-                                            const time = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-                                            return <option key={time} value={time}>{formatTime(time)}</option>;
-                                        })}
+                                        {(appointment.date && bookingHospitalId) ? (
+                                            getAvailableSlots(appointment.date, bookingHospitalId).map(slot => (
+                                                <option key={slot} value={slot}>{formatTime(slot)}</option>
+                                            ))
+                                        ) : (
+                                            <option disabled>Seleccione una fecha primero</option>
+                                        )}
                                     </select>
                                 </div>
                             </div>

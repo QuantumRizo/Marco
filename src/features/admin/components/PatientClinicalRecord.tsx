@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Patient, Appointment } from '../../appointments/types';
 import { MedicalHistoryEditor } from './MedicalHistoryEditor';
 import { PatientFiles } from './PatientFiles';
@@ -8,23 +8,26 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, Phone, Mail, Clock, Calendar } from 'lucide-react';
+import { Activity, Phone, Mail, Clock, Calendar, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 interface PatientClinicalRecordProps {
     patient: Patient;
     appointments: Appointment[];
     hospitals: any[]; // Using any[] to avoid circular dependency or import type if available
     onUpdatePatient: (patient: Patient) => Promise<void>;
+    onDeleteAppointment?: (id: string) => Promise<void>;
 }
 
 export const PatientClinicalRecord = ({
     patient: initialPatient,
     appointments,
     hospitals,
-    onUpdatePatient
+    onUpdatePatient,
+    onDeleteAppointment
 }: PatientClinicalRecordProps) => {
 
     const formatTime = (timeStr: string) => {
@@ -39,12 +42,14 @@ export const PatientClinicalRecord = ({
     // REMOVED useAppointments hook to avoid re-fetching data on every open
     const [patient, setPatient] = useState<Patient>(initialPatient);
     const [generalNotes, setGeneralNotes] = useState<string>(initialPatient.notes || '');
+    const [apptToDelete, setApptToDelete] = useState<string | null>(null);
+    const [isDeletingAppt, setIsDeletingAppt] = useState(false);
 
-    // Refresh local state when props change
-    if (initialPatient.id !== patient.id) {
+    // Sync local state when the selected patient changes
+    useEffect(() => {
         setPatient(initialPatient);
         setGeneralNotes(initialPatient.notes || '');
-    }
+    }, [initialPatient]);
 
     const handleSaveHistory = async (history: any) => {
         const updated = { ...patient, medicalHistory: history };
@@ -151,6 +156,7 @@ export const PatientClinicalRecord = ({
                                                     <TableHead>Sede</TableHead>
                                                     <TableHead>Motivo</TableHead>
                                                     <TableHead>Estado</TableHead>
+                                                    <TableHead className="text-right">Acciones</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -164,12 +170,36 @@ export const PatientClinicalRecord = ({
                                                             {hospitals?.find(h => h.id === appt.hospitalId)?.name || '-'}
                                                         </TableCell>
                                                         <TableCell>
-                                                            {appt.reason === 'specific-service' ? appt.serviceName : appt.reason}
+                                                            {appt.reason === 'specific-service' ? appt.serviceName : appt.reason === 'first-visit' ? 'Primera vez' : appt.reason === 'follow-up' ? 'Seguimiento' : appt.reason}
                                                         </TableCell>
                                                         <TableCell>
-                                                            <Badge variant={appt.status === 'cancelled' ? 'destructive' : 'default'} className={`text-xs ${appt.status !== 'cancelled' ? 'bg-green-600 hover:bg-green-700' : ''}`}>
-                                                                {appt.status === 'cancelled' ? 'Cancelada' : 'Confirmada'}
+                                                            <Badge variant="outline" className={`text-xs font-medium ${appt.status === 'confirmed' ? 'bg-green-50 text-green-700 border-green-200' :
+                                                                appt.status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-200' :
+                                                                    appt.status === 'blocked' ? 'bg-gray-100 text-gray-600 border-gray-300' :
+                                                                        appt.status === 'waiting_room' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                                            appt.status === 'in_progress' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                                                                                appt.status === 'finished' ? 'bg-slate-50 text-slate-600 border-slate-200' :
+                                                                                    'bg-green-50 text-green-700 border-green-200'
+                                                                }`}>
+                                                                {appt.status === 'confirmed' ? 'Confirmada' :
+                                                                    appt.status === 'cancelled' ? 'Cancelada' :
+                                                                        appt.status === 'blocked' ? 'Bloqueado' :
+                                                                            appt.status === 'waiting_room' ? 'En Sala' :
+                                                                                appt.status === 'in_progress' ? 'En Consulta' :
+                                                                                    appt.status === 'finished' ? 'Finalizada' :
+                                                                                        'Confirmada'}
                                                             </Badge>
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                onClick={() => onDeleteAppointment && setApptToDelete(appt.id)}
+                                                                title="Eliminar Cita"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </Button>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))}
@@ -233,7 +263,28 @@ export const PatientClinicalRecord = ({
                     </ScrollArea>
                 </Tabs>
             </div>
-        </div>
 
+            <ConfirmDialog
+                open={!!apptToDelete}
+                onOpenChange={(open) => !open && setApptToDelete(null)}
+                title="¿Eliminar Cita?"
+                description="Esta acción eliminará permanentemente la cita del historial. No se puede deshacer."
+                confirmText="Eliminar Cita"
+                isLoading={isDeletingAppt}
+                onConfirm={async () => {
+                    if (!apptToDelete || !onDeleteAppointment) return;
+                    setIsDeletingAppt(true);
+                    try {
+                        await onDeleteAppointment(apptToDelete);
+                        toast.success('Cita eliminada correctamente');
+                        setApptToDelete(null);
+                    } catch {
+                        toast.error('Error al eliminar cita');
+                    } finally {
+                        setIsDeletingAppt(false);
+                    }
+                }}
+            />
+        </div>
     );
 };

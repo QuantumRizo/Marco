@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserPlus, UserCheck, Search, ArrowLeft, ArrowRight, User } from "lucide-react";
-import { useAppointments } from "../../appointments/hooks/useAppointments";
 import type { Patient } from "../../appointments/types";
 
 interface BookingTypeDialogProps {
@@ -11,10 +10,10 @@ interface BookingTypeDialogProps {
     onOpenChange: (open: boolean) => void;
     onNewPatient: () => void;
     onExistingPatient: (patient: Patient) => void;
+    patients: Patient[];
 }
 
-export const BookingTypeDialog = ({ open, onOpenChange, onNewPatient, onExistingPatient }: BookingTypeDialogProps) => {
-    const { patients } = useAppointments();
+export const BookingTypeDialog = ({ open, onOpenChange, onNewPatient, onExistingPatient, patients }: BookingTypeDialogProps) => {
     const [view, setView] = useState<'options' | 'search'>('options');
     const [searchTerm, setSearchTerm] = useState('');
 

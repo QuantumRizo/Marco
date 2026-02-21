@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { FileText, Upload, Trash2, Loader2, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 interface PatientFile {
     id: string;
@@ -28,6 +29,10 @@ export const PatientFiles = ({ patientId }: PatientFilesProps) => {
     const [uploading, setUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [description, setDescription] = useState('');
+
+    // Delete Confirmation State
+    const [fileToDelete, setFileToDelete] = useState<PatientFile | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         fetchFiles();
@@ -107,14 +112,19 @@ export const PatientFiles = ({ patientId }: PatientFilesProps) => {
         }
     };
 
-    const handleDelete = async (file: PatientFile) => {
-        if (!confirm("¿Estás seguro de eliminar este archivo?")) return;
+    const handleDelete = (file: PatientFile) => {
+        setFileToDelete(file);
+    };
+
+    const confirmDeleteFile = async () => {
+        if (!fileToDelete) return;
 
         try {
+            setIsDeleting(true);
             // 1. Delete from Storage
             const { error: storageError } = await supabase.storage
                 .from('patient_files')
-                .remove([file.file_path]);
+                .remove([fileToDelete.file_path]);
 
             if (storageError) {
                 console.error("Storage delete error", storageError);
@@ -125,16 +135,19 @@ export const PatientFiles = ({ patientId }: PatientFilesProps) => {
             const { error: dbError } = await supabase
                 .from('patient_uploads')
                 .delete()
-                .eq('id', file.id);
+                .eq('id', fileToDelete.id);
 
             if (dbError) throw dbError;
 
             toast.success("Archivo eliminado");
-            setFiles(prev => prev.filter(f => f.id !== file.id));
+            setFiles(prev => prev.filter(f => f.id !== fileToDelete.id));
+            setFileToDelete(null);
 
         } catch (error) {
             console.error('Error deleting file:', error);
             toast.error("Error al eliminar el archivo");
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -292,6 +305,15 @@ export const PatientFiles = ({ patientId }: PatientFilesProps) => {
                     </div>
                 )}
             </div>
+
+            <ConfirmDialog
+                open={!!fileToDelete}
+                onOpenChange={(open) => !open && setFileToDelete(null)}
+                title="¿Eliminar archivo?"
+                description={`¿Estás seguro de que deseas eliminar permanentemente "${fileToDelete?.description || fileToDelete?.file_name}"?`}
+                onConfirm={confirmDeleteFile}
+                isLoading={isDeleting}
+            />
         </div>
     );
 };
