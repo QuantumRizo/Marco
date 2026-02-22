@@ -77,13 +77,13 @@ export const PatientClinicalRecord = ({
     return (
         <div className="flex flex-col h-[80vh]">
             {/* Header */}
-            <div className="flex items-start gap-4 p-6 bg-slate-50 border-b">
+            <div className="flex flex-col sm:flex-row items-start gap-4 p-4 sm:p-6 bg-slate-50 border-b">
                 <div className="w-16 h-16 rounded-full bg-[#1c334a] text-white flex items-center justify-center text-2xl font-bold border-4 border-white shadow-sm">
                     {patient.name.charAt(0)}
                 </div>
-                <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-[#1c334a]">{patient.name}</h2>
-                    <div className="flex gap-4 text-sm text-gray-500 mt-2">
+                <div className="flex-1 min-w-0 w-full">
+                    <h2 className="text-xl sm:text-2xl font-bold text-[#1c334a] truncate">{patient.name}</h2>
+                    <div className="flex flex-wrap gap-2 text-sm text-gray-500 mt-2">
                         <span className="flex items-center gap-1 bg-white px-2 py-1 rounded-md border shadow-sm">
                             <Phone className="w-4 h-4" /> {patient.phone}
                         </span>
@@ -111,8 +111,8 @@ export const PatientClinicalRecord = ({
                         </TabsList>
                     </div>
 
-                    <ScrollArea className="flex-1 p-6">
-                        <TabsContent value="history" className="mt-0 space-y-4">
+                    <ScrollArea className="flex-1 p-4 sm:p-6">
+                        <TabsContent value="history" className="mt-0 space-y-4 max-w-full">
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="text-lg flex items-center gap-2">
@@ -148,32 +148,21 @@ export const PatientClinicalRecord = ({
                                             No hay citas registradas.
                                         </div>
                                     ) : (
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow className="bg-gray-50/50">
-                                                    <TableHead>Fecha</TableHead>
-                                                    <TableHead>Hora</TableHead>
-                                                    <TableHead>Sede</TableHead>
-                                                    <TableHead>Motivo</TableHead>
-                                                    <TableHead>Estado</TableHead>
-                                                    <TableHead className="text-right">Acciones</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
+                                        <div className="space-y-4">
+                                            {/* Mobile View: Cards */}
+                                            <div className="grid grid-cols-1 gap-4 md:hidden">
                                                 {patientAppointments.map((appt) => (
-                                                    <TableRow key={appt.id}>
-                                                        <TableCell className="font-medium">
-                                                            {format(parseISO(appt.date), 'dd MMM yyyy', { locale: es })}
-                                                        </TableCell>
-                                                        <TableCell>{formatTime(appt.time)}</TableCell>
-                                                        <TableCell>
-                                                            {hospitals?.find(h => h.id === appt.hospitalId)?.name || '-'}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            {appt.reason === 'specific-service' ? appt.serviceName : appt.reason === 'first-visit' ? 'Primera vez' : appt.reason === 'follow-up' ? 'Seguimiento' : appt.reason}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <Badge variant="outline" className={`text-xs font-medium ${appt.status === 'confirmed' ? 'bg-green-50 text-green-700 border-green-200' :
+                                                    <div key={appt.id} className="bg-white p-4 rounded-lg border shadow-sm space-y-3">
+                                                        <div className="flex justify-between items-start">
+                                                            <div className="space-y-1">
+                                                                <div className="font-semibold text-[#1c334a]">
+                                                                    {format(parseISO(appt.date), 'dd MMM yyyy', { locale: es })}
+                                                                </div>
+                                                                <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                                    <Clock className="w-3 h-3" /> {formatTime(appt.time)}
+                                                                </div>
+                                                            </div>
+                                                            <Badge variant="outline" className={`text-[10px] font-medium ${appt.status === 'confirmed' ? 'bg-green-50 text-green-700 border-green-200' :
                                                                 appt.status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-200' :
                                                                     appt.status === 'blocked' ? 'bg-gray-100 text-gray-600 border-gray-300' :
                                                                         appt.status === 'waiting_room' ? 'bg-blue-50 text-blue-700 border-blue-200' :
@@ -189,22 +178,96 @@ export const PatientClinicalRecord = ({
                                                                                     appt.status === 'finished' ? 'Finalizada' :
                                                                                         'Confirmada'}
                                                             </Badge>
-                                                        </TableCell>
-                                                        <TableCell className="text-right">
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                                            <div>
+                                                                <span className="text-gray-400 block block mb-0.5">Sede</span>
+                                                                <span className="font-medium truncate max-w-full block">
+                                                                    {hospitals?.find(h => h.id === appt.hospitalId)?.name || '-'}
+                                                                </span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-gray-400 block mb-0.5">Motivo</span>
+                                                                <span className="font-medium truncate max-w-full block">
+                                                                    {appt.reason === 'specific-service' ? appt.serviceName : appt.reason === 'first-visit' ? 'Primera vez' : appt.reason === 'follow-up' ? 'Seguimiento' : appt.reason}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="pt-2 border-t flex justify-end">
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                className="h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
                                                                 onClick={() => onDeleteAppointment && setApptToDelete(appt.id)}
-                                                                title="Eliminar Cita"
                                                             >
-                                                                <Trash2 className="w-4 h-4" />
+                                                                <Trash2 className="w-3 h-3 mr-1" /> Eliminar
                                                             </Button>
-                                                        </TableCell>
-                                                    </TableRow>
+                                                        </div>
+                                                    </div>
                                                 ))}
-                                            </TableBody>
-                                        </Table>
+                                            </div>
+
+                                            {/* Desktop View: Table */}
+                                            <div className="hidden md:block overflow-x-auto max-w-full border rounded-lg">
+                                                <Table className="min-w-full w-full">
+                                                    <TableHeader>
+                                                        <TableRow className="bg-gray-50/50">
+                                                            <TableHead>Fecha</TableHead>
+                                                            <TableHead>Hora</TableHead>
+                                                            <TableHead>Sede</TableHead>
+                                                            <TableHead>Motivo</TableHead>
+                                                            <TableHead>Estado</TableHead>
+                                                            <TableHead className="text-right">Acciones</TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {patientAppointments.map((appt) => (
+                                                            <TableRow key={appt.id}>
+                                                                <TableCell className="font-medium whitespace-nowrap">
+                                                                    {format(parseISO(appt.date), 'dd MMM yyyy', { locale: es })}
+                                                                </TableCell>
+                                                                <TableCell className="whitespace-nowrap">{formatTime(appt.time)}</TableCell>
+                                                                <TableCell className="max-w-[150px] truncate">
+                                                                    {hospitals?.find(h => h.id === appt.hospitalId)?.name || '-'}
+                                                                </TableCell>
+                                                                <TableCell className="max-w-[150px] truncate">
+                                                                    {appt.reason === 'specific-service' ? appt.serviceName : appt.reason === 'first-visit' ? 'Primera vez' : appt.reason === 'follow-up' ? 'Seguimiento' : appt.reason}
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <Badge variant="outline" className={`text-[10px] font-medium whitespace-nowrap ${appt.status === 'confirmed' ? 'bg-green-50 text-green-700 border-green-200' :
+                                                                        appt.status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-200' :
+                                                                            appt.status === 'blocked' ? 'bg-gray-100 text-gray-600 border-gray-300' :
+                                                                                appt.status === 'waiting_room' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                                                    appt.status === 'in_progress' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                                                                                        appt.status === 'finished' ? 'bg-slate-50 text-slate-600 border-slate-200' :
+                                                                                            'bg-green-50 text-green-700 border-green-200'
+                                                                        }`}>
+                                                                        {appt.status === 'confirmed' ? 'Confirmada' :
+                                                                            appt.status === 'cancelled' ? 'Cancelada' :
+                                                                                appt.status === 'blocked' ? 'Bloqueado' :
+                                                                                    appt.status === 'waiting_room' ? 'En Sala' :
+                                                                                        appt.status === 'in_progress' ? 'En Consulta' :
+                                                                                            appt.status === 'finished' ? 'Finalizada' :
+                                                                                                'Confirmada'}
+                                                                    </Badge>
+                                                                </TableCell>
+                                                                <TableCell className="text-right">
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                        onClick={() => onDeleteAppointment && setApptToDelete(appt.id)}
+                                                                        title="Eliminar Cita"
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </Button>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </div>
+                                        </div>
                                     )}
                                 </CardContent>
                             </Card>
@@ -242,8 +305,8 @@ export const PatientClinicalRecord = ({
                                         ></textarea>
                                     </div>
                                 </CardContent>
-                                <div className="p-4 border-t bg-gray-50 flex justify-between items-center">
-                                    <span className="text-xs text-gray-500 italic">
+                                <div className="p-4 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-3">
+                                    <span className="text-xs text-gray-500 italic text-center sm:text-left">
                                         * Estas notas se guardan en el expediente general del paciente.
                                     </span>
                                     <Button

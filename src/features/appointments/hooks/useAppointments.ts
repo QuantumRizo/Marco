@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Appointment, Patient } from '../types';
 import { HOSPITALS, SERVICES /*, HOSPITAL_SCHEDULES */ } from '../types';
+import { isAppointmentPast } from '@/lib/dateUtils';
 
 const APP_ID = 'marco'; // Hardcoded for this specific application
 
@@ -108,8 +109,11 @@ export const useAppointments = () => {
             let query = supabase.from('patients').select('id').eq('app_id', APP_ID); // FILTER ADDED
 
             if (patientData.email) {
-                // Priority 1: Match by Email
-                query = query.eq('email', patientData.email);
+                // Priority 1: Match by Email OR Match by Name + Phone (to avoid duplicates if they later provide email)
+                const safeEmail = patientData.email.replace(/"/g, '');
+                const safeName = patientData.name.replace(/"/g, '');
+                const safePhone = patientData.phone.replace(/"/g, '');
+                query = query.or(`email.eq."${safeEmail}",and(name.eq."${safeName}",phone.eq."${safePhone}")`);
             } else {
                 // Priority 2: Match by Name + Phone (Exact Match)
                 query = query.eq('name', patientData.name).eq('phone', patientData.phone);
@@ -254,8 +258,10 @@ export const useAppointments = () => {
             a.status !== 'cancelled'
         );
 
-        // Calculate now and parse date parts once (local timezone — browser = CDMX)
-        const now = new Date();
+        // Calculate now explicitly for Mexico timezone to avoid local PC issues
+        const mxTimeString = new Date().toLocaleString("en-US", { timeZone: "America/Mexico_City" });
+        const now = new Date(mxTimeString);
+
         const [year, month, day] = date.split('-').map(Number);
 
         let currentMinute = startHour * 60;
@@ -292,6 +298,12 @@ export const useAppointments = () => {
     const deleteAppointment = async (appointmentId: string) => {
         try {
             console.log("deleteAppointment: Deleting", appointmentId);
+
+            const existing = appointments.find(a => a.id === appointmentId);
+            if (existing && isAppointmentPast(existing.date, existing.time)) {
+                throw new Error("No se pueden eliminar citas que ya han pasado.");
+            }
+
             const { error } = await supabase
                 .from('appointments')
                 .delete()
@@ -398,6 +410,11 @@ export const useAppointments = () => {
 
     const updateAppointmentStatus = async (appointmentId: string, status: string) => {
         try {
+            const existing = appointments.find(a => a.id === appointmentId);
+            if (existing && isAppointmentPast(existing.date, existing.time)) {
+                throw new Error("No se puede modificar el estado de citas pasadas.");
+            }
+
             const { error } = await supabase
                 .from('appointments')
                 .update({ status })
@@ -413,6 +430,11 @@ export const useAppointments = () => {
 
     const updateAppointment = async (appointmentId: string, updates: Partial<Appointment>) => {
         try {
+            const existing = appointments.find(a => a.id === appointmentId);
+            if (existing && isAppointmentPast(existing.date, existing.time)) {
+                throw new Error("No se pueden modificar citas que ya han finalizado.");
+            }
+
             // Adjust payload for DB (camelCase → snake_case)
             const dbUpdates: any = {};
             if (updates.status) dbUpdates.status = updates.status;
@@ -459,7 +481,10 @@ export const useAppointments = () => {
             let query = supabase.from('patients').select('id').eq('app_id', APP_ID); // FILTER ADDED
 
             if (patientData.email) {
-                query = query.eq('email', patientData.email);
+                const safeEmail = patientData.email.replace(/"/g, '');
+                const safeName = patientData.name.replace(/"/g, '');
+                const safePhone = patientData.phone.replace(/"/g, '');
+                query = query.or(`email.eq."${safeEmail}",and(name.eq."${safeName}",phone.eq."${safePhone}")`);
             } else {
                 query = query.eq('name', patientData.name).eq('phone', patientData.phone);
             }

@@ -5,10 +5,12 @@ import { format, isToday, parseISO, isThisWeek, isAfter } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { isAppointmentPast } from '@/lib/dateUtils';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface AdminOverviewProps { }
 
@@ -53,10 +55,11 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
                 date: editDate,
                 time: editTime
             });
+            toast.success('Cita reprogramada correctamente');
             setIsEditing(false);
             setSelectedAppointmentId(null);
-        } catch (e) {
-            alert('Error al reprogramar cita');
+        } catch (e: any) {
+            toast.error('Error al reprogramar cita', { description: e.message });
         }
     };
 
@@ -90,9 +93,9 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
 
     return (
         <>
-            <div className="space-y-4 animate-fade-in">
-                {/* KPI Grid - Compact 4 Columns */}
-                <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-4 animate-fade-in max-w-full overflow-hidden px-1 sm:px-0">
+                {/* KPI Grid - Stacked on very small, 2 cols on mobile, 4 on desktop */}
+                <div className="grid gap-3 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4">
                     <Card className="shadow-sm">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
                             <CardTitle className="text-xs font-medium text-muted-foreground">
@@ -160,7 +163,7 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
                                 {format(new Date(), "EEEE, d 'de' MMMM", { locale: es })}
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="p-3 pt-1 max-h-[400px] overflow-y-auto custom-scrollbar">
+                        <CardContent className="p-3 pt-1 max-h-[400px] overflow-x-hidden overflow-y-auto custom-scrollbar">
                             {todayAppointments.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
                                     <Calendar className="h-6 w-6 mb-1 opacity-20" />
@@ -179,15 +182,15 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
                                                             <span className="text-[8px] font-normal">{formatTime(apt.time).split(' ')[1]}</span>
                                                         </span>
                                                     </div>
-                                                    <div className="min-w-0">
-                                                        <h4 className="font-semibold text-gray-900 text-xs truncate">{patient?.name || 'Paciente Desconocido'}</h4>
-                                                        <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 text-[10px] text-gray-500">
-                                                            <span className="flex items-center gap-1">
-                                                                <MapPin className="w-2 h-2" />
-                                                                {hospitals.find(h => h.id === apt.hospitalId)?.name}
+                                                    <div className="min-w-0 flex-1">
+                                                        <h4 className="font-semibold text-gray-900 text-xs truncate max-w-full">{patient?.name || 'Paciente Desconocido'}</h4>
+                                                        <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 text-[10px] text-gray-500 overflow-hidden">
+                                                            <span className="flex items-center gap-1 truncate max-w-full">
+                                                                <MapPin className="w-2 h-2 shrink-0" />
+                                                                <span className="truncate">{hospitals.find(h => h.id === apt.hospitalId)?.name}</span>
                                                             </span>
-                                                            <span className="hidden sm:inline text-gray-300">|</span>
-                                                            <span className="truncate">
+                                                            <span className="hidden sm:inline text-gray-300 shrink-0">|</span>
+                                                            <span className="truncate max-w-full">
                                                                 {apt.reason === 'specific-service' ? apt.serviceName : (
                                                                     apt.reason === 'first-visit' ? 'Primera vez' :
                                                                         apt.reason === 'follow-up' ? 'Seguimiento' :
@@ -204,11 +207,19 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
                                                         {apt.status === 'cancelled' ? 'Cancelada' : 'Confirmada'}
                                                     </span>
                                                     <Dialog onOpenChange={(open) => !open && cancelEditing()}>
-                                                        <DialogTrigger asChild>
-                                                            <Button size="sm" className="h-7 text-xs px-2 bg-[#1c334a] text-white hover:bg-[#152738]">
-                                                                Modificar
-                                                            </Button>
-                                                        </DialogTrigger>
+                                                        {!isAppointmentPast(apt.date, apt.time) ? (
+                                                            <DialogTrigger asChild>
+                                                                <Button size="sm" className="h-7 text-xs px-2 bg-[#1c334a] text-white hover:bg-[#152738]">
+                                                                    Modificar
+                                                                </Button>
+                                                            </DialogTrigger>
+                                                        ) : (
+                                                            <DialogTrigger asChild>
+                                                                <Button size="sm" variant="outline" className="h-7 text-xs px-2 text-gray-500">
+                                                                    Ver Detalle
+                                                                </Button>
+                                                            </DialogTrigger>
+                                                        )}
                                                         <DialogContent>
                                                             <DialogHeader>
                                                                 <DialogTitle>
@@ -299,22 +310,30 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
                                                                         </div>
                                                                     )}
 
-                                                                    {apt.status !== 'blocked' && apt.status !== 'cancelled' && (
-                                                                        <Button
-                                                                            variant="outline"
-                                                                            className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
-                                                                            onClick={() => startEditing(apt)}
-                                                                        >
-                                                                            <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
-                                                                        </Button>
+                                                                    {isAppointmentPast(apt.date, apt.time) ? (
+                                                                        <div className="text-center p-2 text-xs text-gray-400 bg-gray-50 rounded-md border border-gray-100 mt-2">
+                                                                            Esta cita ya finalizó y no puede modificarse.
+                                                                        </div>
+                                                                    ) : (
+                                                                        <>
+                                                                            {apt.status !== 'blocked' && apt.status !== 'cancelled' && (
+                                                                                <Button
+                                                                                    variant="outline"
+                                                                                    className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+                                                                                    onClick={() => startEditing(apt)}
+                                                                                >
+                                                                                    <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
+                                                                                </Button>
+                                                                            )}
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                className="w-full mt-2 border-red-200 text-red-600 hover:bg-red-50"
+                                                                                onClick={() => setApptToDelete(apt.id)}
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4 mr-2" /> Eliminar Cita
+                                                                            </Button>
+                                                                        </>
                                                                     )}
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        className="w-full mt-2 border-red-200 text-red-600 hover:bg-red-50"
-                                                                        onClick={() => setApptToDelete(apt.id)}
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4 mr-2" /> Eliminar Cita
-                                                                    </Button>
                                                                 </div>
                                                             )}
                                                         </DialogContent>
@@ -345,23 +364,31 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
                                             const patient = patients.find(p => p.id === apt.patientId);
                                             return (
                                                 <div key={apt.id} className="flex items-center justify-between pb-2 border-b last:border-0 last:pb-0 p-2 -mx-2 rounded hover:bg-gray-50 transition-colors">
-                                                    <div className="flex items-start gap-2.5 min-w-0">
+                                                    <div className="flex items-start gap-2.5 min-w-0 flex-1">
                                                         <div className="mt-1 bg-blue-50 p-1 rounded-full text-blue-600 shrink-0">
                                                             <Clock className="w-2.5 h-2.5" />
                                                         </div>
-                                                        <div className="min-w-0">
-                                                            <p className="font-medium text-xs text-gray-800 truncate">{patient?.name}</p>
-                                                            <p className="text-[10px] text-gray-500 truncate">
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="font-medium text-xs text-gray-800 truncate max-w-full">{patient?.name}</p>
+                                                            <p className="text-[10px] text-gray-500 truncate max-w-full">
                                                                 {format(parseISO(apt.date), "dd MMM", { locale: es })} • {formatTime(apt.time)}
                                                             </p>
                                                         </div>
                                                     </div>
                                                     <Dialog onOpenChange={(open) => !open && cancelEditing()}>
-                                                        <DialogTrigger asChild>
-                                                            <Button size="sm" className="h-6 text-[10px] px-2 bg-[#1c334a] text-white hover:bg-[#152738]">
-                                                                Modificar
-                                                            </Button>
-                                                        </DialogTrigger>
+                                                        {!isAppointmentPast(apt.date, apt.time) ? (
+                                                            <DialogTrigger asChild>
+                                                                <Button size="sm" className="h-6 text-[10px] px-2 bg-[#1c334a] text-white hover:bg-[#152738]">
+                                                                    Modificar
+                                                                </Button>
+                                                            </DialogTrigger>
+                                                        ) : (
+                                                            <DialogTrigger asChild>
+                                                                <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 text-gray-500">
+                                                                    Ver Detalle
+                                                                </Button>
+                                                            </DialogTrigger>
+                                                        )}
                                                         <DialogContent>
                                                             <DialogHeader>
                                                                 <DialogTitle>
@@ -456,22 +483,30 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
                                                                         </div>
                                                                     )}
 
-                                                                    {apt.status !== 'blocked' && apt.status !== 'cancelled' && (
-                                                                        <Button
-                                                                            variant="outline"
-                                                                            className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
-                                                                            onClick={() => startEditing(apt)}
-                                                                        >
-                                                                            <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
-                                                                        </Button>
+                                                                    {isAppointmentPast(apt.date, apt.time) ? (
+                                                                        <div className="text-center p-2 text-xs text-gray-400 bg-gray-50 rounded-md border border-gray-100 mt-2">
+                                                                            Esta cita ya finalizó y no puede modificarse.
+                                                                        </div>
+                                                                    ) : (
+                                                                        <>
+                                                                            {apt.status !== 'blocked' && apt.status !== 'cancelled' && (
+                                                                                <Button
+                                                                                    variant="outline"
+                                                                                    className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+                                                                                    onClick={() => startEditing(apt)}
+                                                                                >
+                                                                                    <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
+                                                                                </Button>
+                                                                            )}
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                className="w-full mt-2 border-red-200 text-red-600 hover:bg-red-50"
+                                                                                onClick={() => setApptToDelete(apt.id)}
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4 mr-2" /> Eliminar Cita
+                                                                            </Button>
+                                                                        </>
                                                                     )}
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        className="w-full mt-2 border-red-200 text-red-600 hover:bg-red-50"
-                                                                        onClick={() => setApptToDelete(apt.id)}
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4 mr-2" /> Eliminar Cita
-                                                                    </Button>
                                                                 </div>
                                                             )}
                                                         </DialogContent>
@@ -501,13 +536,13 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
 
                                         return (
                                             <div key={hospital.id} className="flex items-center justify-between pb-2 border-b last:border-0 last:pb-0">
-                                                <div className="flex items-center gap-2 min-w-0">
+                                                <div className="flex items-center gap-2 min-w-0 flex-1">
                                                     <div className="p-1.5 bg-gray-100 rounded-md shrink-0">
                                                         <MapPin className="w-3 h-3 text-gray-600" />
                                                     </div>
-                                                    <div className="min-w-0">
-                                                        <p className="text-xs font-medium text-gray-900 truncate">{hospital.name}</p>
-                                                        <p className="text-[10px] text-gray-500 truncate">{hospital.address || 'Ubicación registrada'}</p>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="text-xs font-medium text-gray-900 truncate max-w-full">{hospital.name}</p>
+                                                        <p className="text-[10px] text-gray-500 truncate max-w-full">{hospital.address || 'Ubicación registrada'}</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-col items-end shrink-0">
@@ -536,9 +571,10 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
                     setIsDeletingAppt(true);
                     try {
                         await deleteAppointment(apptToDelete);
+                        toast.success('Cita eliminada correctamente');
                         setApptToDelete(null);
                     } catch {
-                        alert('Error al eliminar la cita');
+                        toast.error('Error al eliminar la cita');
                     } finally {
                         setIsDeletingAppt(false);
                     }

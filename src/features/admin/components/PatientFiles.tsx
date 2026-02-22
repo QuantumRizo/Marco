@@ -188,7 +188,7 @@ export const PatientFiles = ({ patientId }: PatientFilesProps) => {
                     <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
                             <Label htmlFor="file-upload">Archivo</Label>
-                            <div className="flex gap-2 items-center">
+                            <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
                                 <Label
                                     htmlFor="file-upload"
                                     className="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-900 h-10 px-4 py-2 shadow-sm"
@@ -196,7 +196,7 @@ export const PatientFiles = ({ patientId }: PatientFilesProps) => {
                                     <Upload className="mr-2 h-4 w-4" />
                                     {selectedFile ? 'Cambiar archivo' : 'Seleccionar archivo'}
                                 </Label>
-                                <span className="text-sm text-gray-500 truncate max-w-[200px]">
+                                <span className="text-sm text-gray-500 truncate max-w-full sm:max-w-[200px]">
                                     {selectedFile ? selectedFile.name : 'Ningún archivo seleccionado'}
                                 </span>
                                 <Input
@@ -241,9 +241,9 @@ export const PatientFiles = ({ patientId }: PatientFilesProps) => {
 
             {/* Files List */}
             <div className="space-y-4">
-                <h3 className="font-semibold text-lg flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-gray-500" />
-                    Archivos Guardados ({files.length})
+                <h3 className="font-semibold text-lg flex flex-wrap items-center gap-2">
+                    <FileText className="w-5 h-5 text-gray-500 shrink-0" />
+                    <span className="truncate">Archivos Guardados ({files.length})</span>
                 </h3>
 
                 {loading ? (

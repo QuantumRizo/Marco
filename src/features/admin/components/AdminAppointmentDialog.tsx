@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 
 import { HOSPITAL_SCHEDULES, type Hospital } from "@/features/appointments/types";
 import { ArrowLeft, Building2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface AdminAppointmentDialogProps {
     hospitals: Hospital[];
@@ -88,12 +89,12 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
 
         // Basic Validation
         if (!patient.name || !patient.phone || !appointment.date || !appointment.time || !appointment.reason) {
-            alert("Por favor complete todos los campos obligatorios");
+            toast.error("Datos incompletos", { description: "Por favor complete todos los campos obligatorios." });
             return;
         }
 
         if (appointment.reason === 'specific-service' && !appointment.serviceName) {
-            alert("Por favor describa el servicio específico");
+            toast.error("Datos incompletos", { description: "Por favor describa el servicio específico." });
             return;
         }
 
@@ -116,9 +117,9 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
             setPatient({ name: '', email: '', emailError: '', phone: '', notes: '' });
             setAppointment({ serviceId: '', serviceName: '', date: '', time: '', reason: '' });
             setBookingHospitalId(null);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error scheduling:", error);
-            alert("Error al agendar la cita. Verifique los datos.");
+            toast.error("Error al agendar la cita", { description: error.message || "Verifique los datos." });
         } finally {
             setIsSubmitting(false);
         }

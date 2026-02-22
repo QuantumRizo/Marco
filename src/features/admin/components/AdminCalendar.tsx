@@ -16,13 +16,17 @@ import {
     addMonths,
     subMonths,
     parseISO,
-    isToday
+    isToday,
+    isBefore,
+    startOfToday
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Label } from '@/components/ui/label';
 import { Input } from "@/components/ui/input";
+import { toast } from 'sonner';
+import { isAppointmentPast } from '@/lib/dateUtils';
 
 // No props needed for Global View
 interface AdminCalendarProps {
@@ -51,6 +55,15 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
         date.setHours(parseInt(hours, 10));
         date.setMinutes(parseInt(minutes, 10));
         return format(date, 'h:mm a', { locale: es });
+    };
+
+    const getHospitalAcronym = (name?: string) => {
+        if (!name) return '';
+        const words = name.trim().split(/\s+/).filter(w => w.length > 0 && w.toLowerCase() !== 'de' && w.toLowerCase() !== 'la' && w.toLowerCase() !== 'el');
+        if (words.length > 1) {
+            return words.map(w => w[0]).join('').substring(0, 3).toUpperCase();
+        }
+        return name.substring(0, 3).toUpperCase();
     };
 
     // Delete confirmation state
@@ -97,9 +110,10 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
         setIsDeleting(true);
         try {
             await deleteAppointment(appointmentToDelete);
+            toast.success('Cita eliminada correctamente');
             setAppointmentToDelete(null);
         } catch (e) {
-            alert('Error al eliminar la cita');
+            toast.error('Error al eliminar la cita');
         } finally {
             setIsDeleting(false);
         }
@@ -125,10 +139,11 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                 date: editDate,
                 time: editTime
             });
+            toast.success('Cita reprogramada correctamente');
             setIsEditing(false);
             setSelectedAppointmentId(null);
-        } catch (e) {
-            alert('Error al reprogramar cita');
+        } catch (e: any) {
+            toast.error('Error al reprogramar cita', { description: e.message });
         }
     };
 
@@ -223,12 +238,13 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                             className={`
                                                                 text-[10px] text-left px-1.5 py-1 rounded w-full border-l-2 font-medium transition-all hover:brightness-95
                                                                 ${getStatusColor(apt.status)}
+                                                                ${isBefore(parseISO(apt.date), startOfToday()) ? 'opacity-50 grayscale' : ''}
                                                             `}
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
                                                             <div className="flex items-center gap-1 flex-wrap">
                                                                 <span className="text-[9px] font-bold bg-[#1c334a]/10 text-[#1c334a] px-1 rounded uppercase shrink-0">
-                                                                    {hospitals.find(h => h.id === apt.hospitalId)?.name.substring(0, 3)}
+                                                                    {getHospitalAcronym(hospitals.find(h => h.id === apt.hospitalId)?.name)}
                                                                 </span>
                                                                 <span className="line-clamp-1 break-all">{formatTime(apt.time)} - {patient?.name.split(' ')[0] || 'Cita'}</span>
                                                             </div>
@@ -326,23 +342,31 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                     </div>
                                                                 )}
 
-                                                                {/* Edit Button */}
-                                                                {apt.status !== 'blocked' && (
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
-                                                                        onClick={() => startEditing(apt)}
-                                                                    >
-                                                                        <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
-                                                                    </Button>
+                                                                {isAppointmentPast(apt.date, apt.time) ? (
+                                                                    <div className="text-center p-2 text-xs text-gray-400 bg-gray-50 rounded-md border border-gray-100 mt-2">
+                                                                        Esta cita ya finalizó y no puede modificarse.
+                                                                    </div>
+                                                                ) : (
+                                                                    <>
+                                                                        {/* Edit Button */}
+                                                                        {apt.status !== 'blocked' && (
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+                                                                                onClick={() => startEditing(apt)}
+                                                                            >
+                                                                                <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
+                                                                            </Button>
+                                                                        )}
+                                                                        <Button
+                                                                            variant="outline"
+                                                                            className="w-full mt-2 border-red-200 text-red-600 hover:bg-red-50"
+                                                                            onClick={() => handleDeleteAppointment(apt.id)}
+                                                                        >
+                                                                            <Trash2 className="w-4 h-4 mr-2" /> Eliminar Cita
+                                                                        </Button>
+                                                                    </>
                                                                 )}
-                                                                <Button
-                                                                    variant="outline"
-                                                                    className="w-full mt-2 border-red-200 text-red-600 hover:bg-red-50"
-                                                                    onClick={() => handleDeleteAppointment(apt.id)}
-                                                                >
-                                                                    <Trash2 className="w-4 h-4 mr-2" /> Eliminar Cita
-                                                                </Button>
                                                             </div>
                                                         )}
                                                     </DialogContent>
@@ -381,7 +405,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                 return (
                                     <div
                                         key={apt.id}
-                                        className="p-3 flex gap-3 items-center hover:bg-gray-50 transition-colors cursor-pointer border rounded-lg active:bg-gray-100"
+                                        className={`p-3 flex gap-3 items-center hover:bg-gray-50 transition-colors cursor-pointer border rounded-lg active:bg-gray-100 ${isBefore(parseISO(apt.date), startOfToday()) ? 'opacity-60 grayscale' : ''}`}
                                         onClick={() => {
                                             setSelectedDay(null);
                                             setTimeout(() => setSelectedDetailApt(apt), 150);
@@ -513,25 +537,33 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                 {apt.notes}
                                             </div>
                                         )}
-                                        {apt.status !== 'blocked' && (
-                                            <Button
-                                                variant="outline"
-                                                className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
-                                                onClick={() => startEditing(apt)}
-                                            >
-                                                <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
-                                            </Button>
+                                        {isAppointmentPast(apt.date, apt.time) ? (
+                                            <div className="text-center p-2 text-xs text-gray-400 bg-gray-50 rounded-md border border-gray-100 mt-2">
+                                                Esta cita ya finalizó y no puede modificarse.
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {apt.status !== 'blocked' && (
+                                                    <Button
+                                                        variant="outline"
+                                                        className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+                                                        onClick={() => startEditing(apt)}
+                                                    >
+                                                        <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
+                                                    </Button>
+                                                )}
+                                                <Button
+                                                    variant="outline"
+                                                    className="w-full mt-2 border-red-200 text-red-600 hover:bg-red-50"
+                                                    onClick={() => {
+                                                        setSelectedDetailApt(null);
+                                                        handleDeleteAppointment(apt.id);
+                                                    }}
+                                                >
+                                                    <Trash2 className="w-4 h-4 mr-2" /> Eliminar Cita
+                                                </Button>
+                                            </>
                                         )}
-                                        <Button
-                                            variant="outline"
-                                            className="w-full mt-2 border-red-200 text-red-600 hover:bg-red-50"
-                                            onClick={() => {
-                                                setSelectedDetailApt(null);
-                                                handleDeleteAppointment(apt.id);
-                                            }}
-                                        >
-                                            <Trash2 className="w-4 h-4 mr-2" /> Eliminar Cita
-                                        </Button>
                                     </div>
                                 )}
                             </DialogContent>
@@ -583,7 +615,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                 return (
                                                     <Dialog key={apt.id} onOpenChange={(open) => !open && cancelEditing()}>
                                                         <DialogTrigger asChild>
-                                                            <div className="p-3 flex gap-3 items-center hover:bg-gray-50 transition-colors cursor-pointer active:bg-gray-100">
+                                                            <div className={`p-3 flex gap-3 items-center hover:bg-gray-50 transition-colors cursor-pointer active:bg-gray-100 ${isBefore(parseISO(apt.date), startOfToday()) ? 'opacity-60 grayscale' : ''}`}>
                                                                 <div className="flex flex-col items-center justify-center min-w-[3.5rem] py-1 bg-gray-100 rounded text-gray-700 font-bold text-sm">
                                                                     {formatTime(apt.time).split(' ')[0]}
                                                                     <span className="text-[10px] font-normal text-gray-500">{formatTime(apt.time).split(' ')[1]}</span>
@@ -678,22 +710,30 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                         {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason === 'follow-up' ? 'Seguimiento' : apt.reason)}
                                                                     </div>
 
-                                                                    {apt.status !== 'blocked' && (
-                                                                        <Button
-                                                                            variant="outline"
-                                                                            className="w-full mt-2"
-                                                                            onClick={() => startEditing(apt)}
-                                                                        >
-                                                                            <Edit2 className="w-4 h-4 mr-2" /> Reprogramar
-                                                                        </Button>
+                                                                    {isAppointmentPast(apt.date, apt.time) ? (
+                                                                        <div className="text-center p-2 text-xs text-gray-400 bg-gray-50 rounded-md border border-gray-100 mt-2">
+                                                                            Esta cita ya finalizó y no puede modificarse.
+                                                                        </div>
+                                                                    ) : (
+                                                                        <>
+                                                                            {apt.status !== 'blocked' && (
+                                                                                <Button
+                                                                                    variant="outline"
+                                                                                    className="w-full mt-2"
+                                                                                    onClick={() => startEditing(apt)}
+                                                                                >
+                                                                                    <Edit2 className="w-4 h-4 mr-2" /> Reprogramar
+                                                                                </Button>
+                                                                            )}
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                className="w-full mt-2 border-red-200 text-red-600 hover:bg-red-50"
+                                                                                onClick={() => handleDeleteAppointment(apt.id)}
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4 mr-2" /> Eliminar Cita
+                                                                            </Button>
+                                                                        </>
                                                                     )}
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        className="w-full mt-2 border-red-200 text-red-600 hover:bg-red-50"
-                                                                        onClick={() => handleDeleteAppointment(apt.id)}
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4 mr-2" /> Eliminar Cita
-                                                                    </Button>
                                                                 </div>
                                                             )}
                                                         </DialogContent>
