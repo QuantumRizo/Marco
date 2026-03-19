@@ -1,11 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useAppointments } from '../../appointments/hooks/useAppointments';
-import { PatientClinicalRecord } from './PatientClinicalRecord';
 import { AddPatientDialog } from './AddPatientDialog';
 import type { Patient } from '../../appointments/types';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format, isAfter, parseISO } from 'date-fns';
@@ -14,6 +12,7 @@ import { Search, MapPin, Phone, Mail, Trash2, Calendar, ArrowRight, User, FileTe
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -22,7 +21,8 @@ interface PatientDirectoryProps {
 }
 
 export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) => {
-    const { appointments, patients, hospitals, updatePatient, deletePatient, deleteAppointment, addPatient, loading } = useAppointments();
+    const { appointments, patients, hospitals, deletePatient, addPatient, loading } = useAppointments();
+    const navigate = useNavigate();
 
     const formatTime = (timeStr: string) => {
         if (!timeStr) return '';
@@ -34,7 +34,6 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
     };
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
     const [selectedHospitalFilter, setSelectedHospitalFilter] = useState<string>('all');
@@ -129,7 +128,7 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
     };
 
     const handleOpenPatient = (patient: Patient) => {
-        setSelectedPatient(patient);
+        navigate(`/admin/pacientes/${patient.id}`);
     };
 
     const handleDeletePatient = async (id: string, e: React.MouseEvent) => {
@@ -317,33 +316,14 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
                                                                 <CalendarPlus className="w-4 h-4 mr-2" />
                                                                 Agendar
                                                             </Button>
-                                                            <Dialog>
-                                                                <DialogTrigger asChild>
-                                                                    <Button
-                                                                        size="sm"
-                                                                        className="bg-[#1c334a] hover:bg-[#2a4560] shadow-sm"
-                                                                        onClick={() => handleOpenPatient(patient)}
-                                                                    >
-                                                                        <FileText className="w-4 h-4 mr-2" />
-                                                                        Expediente
-                                                                    </Button>
-                                                                </DialogTrigger>
-                                                                <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
-                                                                    <DialogHeader>
-                                                                        <DialogTitle className="text-xl">Expediente Clínico</DialogTitle>
-                                                                    </DialogHeader>
-
-                                                                    {selectedPatient && (
-                                                                        <PatientClinicalRecord
-                                                                            patient={selectedPatient}
-                                                                            appointments={appointments}
-                                                                            hospitals={hospitals}
-                                                                            onUpdatePatient={updatePatient}
-                                                                            onDeleteAppointment={deleteAppointment}
-                                                                        />
-                                                                    )}
-                                                                </DialogContent>
-                                                            </Dialog>
+                                                            <Button
+                                                                size="sm"
+                                                                className="bg-[#1c334a] hover:bg-[#2a4560] shadow-sm"
+                                                                onClick={() => handleOpenPatient(patient)}
+                                                            >
+                                                                <FileText className="w-4 h-4 mr-2" />
+                                                                Expediente
+                                                            </Button>
                                                             <Button
                                                                 size="sm"
                                                                 variant="destructive"
@@ -405,34 +385,15 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
                                                     Agendar
                                                 </Button>
 
-                                                <Dialog>
-                                                    <DialogTrigger asChild>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
-                                                            className="w-full border-[#1c334a] text-[#1c334a] hover:bg-blue-50 h-10"
-                                                            onClick={() => handleOpenPatient(patient)}
-                                                        >
-                                                            <FileText className="w-4 h-4 mr-1.5" />
-                                                            Expediente
-                                                        </Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent className="w-[95%] sm:max-w-[800px] max-h-[90vh] overflow-y-auto p-4 md:p-6">
-                                                        <DialogHeader>
-                                                            <DialogTitle className="text-xl">Expediente Clínico</DialogTitle>
-                                                        </DialogHeader>
-
-                                                        {selectedPatient && (
-                                                            <PatientClinicalRecord
-                                                                patient={selectedPatient}
-                                                                appointments={appointments}
-                                                                hospitals={hospitals}
-                                                                onUpdatePatient={updatePatient}
-                                                                onDeleteAppointment={deleteAppointment}
-                                                            />
-                                                        )}
-                                                    </DialogContent>
-                                                </Dialog>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="w-full border-[#1c334a] text-[#1c334a] hover:bg-blue-50 h-10"
+                                                    onClick={() => handleOpenPatient(patient)}
+                                                >
+                                                    <FileText className="w-4 h-4 mr-1.5" />
+                                                    Expediente
+                                                </Button>
                                             </div>
                                             <Button
                                                 size="sm"

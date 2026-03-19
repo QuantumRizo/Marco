@@ -185,7 +185,7 @@ export const PatientFiles = ({ patientId }: PatientFilesProps) => {
                     <CardDescription>Formatos permitidos: Imágenes (JPG, PNG) y Documentos (PDF)</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="flex flex-col gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="file-upload">Archivo</Label>
                             <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
@@ -255,7 +255,7 @@ export const PatientFiles = ({ patientId }: PatientFilesProps) => {
                         No hay archivos cargados para este paciente.
                     </div>
                 ) : (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-4 grid-cols-2 xl:grid-cols-3">
                         {files.map(file => {
                             const publicUrl = getFileUrl(file.file_path);
                             const thumbnailUrl = getThumbnailUrl(file.file_path);

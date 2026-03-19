@@ -13,7 +13,7 @@ import { AdminAppointmentDialog } from './AdminAppointmentDialog';
 import { BookingTypeDialog } from './BookingTypeDialog';
 import { GlobalSearch } from './GlobalSearch';
 import { supabase } from '@/lib/supabase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export const AdminDashboard = () => {
     const { hospitals, blockSlot, saveAppointment, addPatient, getAvailableSlots, patients } = useAppointments();
@@ -51,6 +51,8 @@ export const AdminDashboard = () => {
     const [isBlocking, setIsBlocking] = useState(false);
 
     const [bookingPatientData, setBookingPatientData] = useState<{ name: string, email: string, phone: string, notes?: string } | null>(null);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentTab = searchParams.get('tab') || 'overview';
 
     const handleBlockSlot = async () => {
         if (!blockDate || !blockTime) return;
@@ -255,7 +257,7 @@ export const AdminDashboard = () => {
 
 
             <div className="container mx-auto px-4">
-                <Tabs defaultValue="overview" className="space-y-6">
+                <Tabs value={currentTab} onValueChange={(val) => setSearchParams({ tab: val })} className="space-y-6">
                     <TabsList className="grid w-full grid-cols-3 lg:w-[400px] mx-auto lg:mx-0">
                         <TabsTrigger value="overview" className="gap-2">
                             <LayoutDashboard className="w-4 h-4" /> Tablero

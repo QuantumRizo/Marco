@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 // import Book from "./pages/Book";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
+import PatientRecordPage from "./pages/PatientRecordPage";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,14 @@ const App = () => (
             element={
               <PrivateRoute>
                 <Admin />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/pacientes/:id"
+            element={
+              <PrivateRoute>
+                <PatientRecordPage />
               </PrivateRoute>
             }
           />
