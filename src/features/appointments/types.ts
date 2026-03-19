@@ -59,6 +59,7 @@ export interface MedicalHistory {
     currentCondition?: string; // Padecimiento actual
     physicalExploration?: string; // Exploración física
     labStudies?: string; // Estudios de laboratorio y gabinete
+    diagnosis?: string; // Diagnóstico
     treatment?: string; // Tratamiento
     prognosis?: string; // Pronóstico
 }

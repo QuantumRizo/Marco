@@ -417,6 +417,14 @@ export const MedicalHistoryEditor = ({ patient, onSave }: MedicalHistoryEditorPr
                         />
                     </div>
                     <div className="space-y-2">
+                        <Label>Diagnóstico</Label>
+                        <Textarea
+                            className="min-h-[100px]"
+                            value={history.diagnosis || ''}
+                            onChange={(e) => handleChange('diagnosis', e.target.value)}
+                        />
+                    </div>
+                    <div className="space-y-2">
                         <Label>Tratamiento</Label>
                         <Textarea
                             className="min-h-[100px]"
