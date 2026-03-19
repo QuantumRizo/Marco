@@ -376,38 +376,50 @@ export const PatientClinicalRecord = ({
                     </CardContent>
                 </Card>
 
-                {/* Medicamentos y Notas de Evolución */}
+                {/* Medicamentos Activos */}
                 <Card className="shadow-sm">
                     <CardHeader className="bg-gray-50/50 pb-3 border-b">
                         <CardTitle className="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2">
                             <Clock className="w-4 h-4 text-[#1c334a]" />
-                            Medicamentos y Continuidad
+                            Medicamentos Activos
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-1">
-                            <Label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">Medicamentos Activos</Label>
-                            <Textarea 
-                                className="min-h-[150px] resize-y text-sm bg-white font-medium shadow-inner" 
-                                placeholder="Escriba los medicamentos que el paciente toma regularmente..." 
-                                value={history.medications || ''} 
-                                onChange={(e) => handleChange('medications', e.target.value)} 
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <Label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">Cuaderno de Evolución (Notas)</Label>
-                            <textarea
-                                className="w-full h-full min-h-[150px] resize-y bg-[url('https://www.transparenttextures.com/patterns/lined-paper.png')] bg-white leading-6 p-2 text-sm text-gray-800 font-medium focus:outline-none border shadow-sm rounded-md"
-                                placeholder="Notas libres..."
-                                value={generalNotes}
-                                onChange={(e) => setGeneralNotes(e.target.value)}
-                                style={{
-                                    backgroundImage: 'linear-gradient(#e5e7eb 1px, transparent 1px)',
-                                    backgroundSize: '100% 24px',
-                                    lineHeight: '24px'
-                                }}
-                            ></textarea>
-                        </div>
+                    <CardContent className="pt-4">
+                        <Textarea 
+                            className="min-h-[120px] resize-y text-sm bg-white font-medium shadow-inner" 
+                            placeholder="Escriba los medicamentos que el paciente toma regularmente..." 
+                            value={history.medications || ''} 
+                            onChange={(e) => handleChange('medications', e.target.value)} 
+                        />
+                    </CardContent>
+                </Card>
+
+                {/* Notas de Evolución — full width, lined notebook style */}
+                <Card className="shadow-sm">
+                    <CardHeader className="bg-gray-50/50 pb-3 border-b">
+                        <CardTitle className="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-[#1c334a]" />
+                            Notas de Evolución
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-4 p-0">
+                        <textarea
+                            className="w-full resize-y text-sm text-gray-800 font-medium focus:outline-none rounded-b-md"
+                            placeholder="Escriba aquí las notas de evolución del paciente..."
+                            value={generalNotes}
+                            onChange={(e) => setGeneralNotes(e.target.value)}
+                            rows={24}
+                            style={{
+                                backgroundImage: 'linear-gradient(transparent calc(100% - 1px), #d1d5db 1px)',
+                                backgroundSize: '100% 2rem',
+                                lineHeight: '2rem',
+                                padding: '0.5rem 1.25rem',
+                                paddingTop: '0.5rem',
+                                minHeight: '480px',
+                                border: 'none',
+                                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.04)',
+                            }}
+                        ></textarea>
                     </CardContent>
                 </Card>
             </div>
