@@ -180,7 +180,8 @@ export const PatientClinicalRecord = ({
     });
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-24">
+        <div className="flex flex-col gap-6 pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             {/* --- COLUMN 1: LEFT (3/12) --- */}
             <div className="lg:col-span-3 flex flex-col gap-6">
@@ -394,34 +395,6 @@ export const PatientClinicalRecord = ({
                     </CardContent>
                 </Card>
 
-                {/* Notas de Evolución — full width, lined notebook style */}
-                <Card className="shadow-sm">
-                    <CardHeader className="bg-gray-50/50 pb-3 border-b">
-                        <CardTitle className="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-[#1c334a]" />
-                            Notas de Evolución
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-4 p-0">
-                        <textarea
-                            className="w-full resize-y text-sm text-gray-800 font-medium focus:outline-none rounded-b-md"
-                            placeholder="Escriba aquí las notas de evolución del paciente..."
-                            value={generalNotes}
-                            onChange={(e) => setGeneralNotes(e.target.value)}
-                            rows={24}
-                            style={{
-                                backgroundImage: 'linear-gradient(transparent calc(100% - 1px), #d1d5db 1px)',
-                                backgroundSize: '100% 2rem',
-                                lineHeight: '2rem',
-                                padding: '0.5rem 1.25rem',
-                                paddingTop: '0.5rem',
-                                minHeight: '480px',
-                                border: 'none',
-                                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.04)',
-                            }}
-                        ></textarea>
-                    </CardContent>
-                </Card>
             </div>
 
             {/* --- COLUMN 3: RIGHT (3/12) --- */}
@@ -705,6 +678,46 @@ export const PatientClinicalRecord = ({
                 </Card>
 
             </div>
+        </div>
+
+            {/* Notas de Evolución — cuaderno grande ancho completo */}
+            <Card className="shadow-md border-t-4 border-t-[#1c334a]">
+                <CardHeader className="pb-4 border-b bg-[#1c334a]">
+                    <CardTitle className="text-base font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                        <FileText className="w-5 h-5" />
+                        Notas de Evolución
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0 overflow-hidden rounded-b-lg">
+                    <div className="relative">
+                        {/* Red margin line */}
+                        <div className="absolute top-0 bottom-0 left-[3.5rem] w-px bg-red-300/70 pointer-events-none z-10" />
+                        <textarea
+                            className="w-full resize-y text-sm text-gray-800 focus:outline-none"
+                            placeholder="Escriba aquí las notas de evolución del paciente..."
+                            value={generalNotes}
+                            onChange={(e) => setGeneralNotes(e.target.value)}
+                            rows={36}
+                            style={{
+                                backgroundImage: 'linear-gradient(transparent calc(100% - 1px), #bfdbfe 1px)',
+                                backgroundSize: '100% 2rem',
+                                backgroundColor: '#fefefe',
+                                lineHeight: '2rem',
+                                paddingLeft: '4.5rem',
+                                paddingRight: '2rem',
+                                paddingTop: '0.75rem',
+                                paddingBottom: '2rem',
+                                minHeight: '700px',
+                                border: 'none',
+                                fontFamily: '"Georgia", serif',
+                                fontSize: '0.9rem',
+                                color: '#1e293b',
+                                boxShadow: 'inset 2px 0 8px rgba(0,0,0,0.03)',
+                            }}
+                        ></textarea>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Unsaved Changes Banner */}
             <div className={`fixed bottom-0 left-0 right-0 bg-white border-t border-orange-200 px-6 py-4 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] z-50 flex justify-between items-center transition-transform duration-300 ${hasUnsavedChanges ? 'translate-y-0' : 'translate-y-full'}`}>
