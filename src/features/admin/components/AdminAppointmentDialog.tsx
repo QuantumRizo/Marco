@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { HOSPITAL_SCHEDULES, type Hospital } from "@/features/appointments/types";
+import { type Hospital } from "@/features/appointments/types";
 import { ArrowLeft, Building2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -239,17 +239,15 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="admin-date">Fecha *</Label>
-                                    <div className="text-[10px] text-blue-600 font-medium mb-1 leading-tight">
-                                        Días habituales: {
-                                            HOSPITAL_SCHEDULES[bookingHospitalId]?.allowedDays
-                                                .map(d => ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][d])
-                                                .join(', ') || 'Consultar Horario'
-                                        }
-                                        <br />
-                                        <span className="text-amber-600 font-semibold">
-                                            * Si agenda fuera de estos días, favor de confirmar con el Dr. Marco.
-                                        </span>
-                                    </div>
+                                    {selectedHospital?.allowedDaysText && (
+                                        <div className="text-[10px] text-blue-600 font-medium mb-1 leading-tight">
+                                            Días habituales: {selectedHospital.allowedDaysText}
+                                            <br />
+                                            <span className="text-amber-600 font-semibold">
+                                                * Si agenda fuera de estos días, favor de confirmar con el Dr. Marco.
+                                            </span>
+                                        </div>
+                                    )}
                                     <Input
                                         id="admin-date"
                                         type="date"

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Appointment, Patient } from '../types';
-import { HOSPITALS, SERVICES /*, HOSPITAL_SCHEDULES */ } from '../types';
+import { HOSPITALS, SERVICES } from '../types';
 import { isAppointmentPast } from '@/lib/dateUtils';
 
 const APP_ID = 'marco'; // Hardcoded for this specific application
@@ -236,17 +236,6 @@ export const useAppointments = () => {
     };
 
     const getAvailableSlots = (date: string, _hospitalId: string) => {
-        /* Commented out as part of allowing any day scheduling
-        const schedule = HOSPITAL_SCHEDULES[hospitalId];
-        const [year, month, day] = date.split('-').map(Number);
-        const dateObj = new Date(year, month - 1, day);
-        const dayOfWeek = dateObj.getDay(); // 0-6
-
-        if (!schedule || !schedule.allowedDays.includes(dayOfWeek)) {
-            return [];
-        }
-        */
-
         const slots: string[] = [];
         const startHour = 9;
         const endHour = 20.5; // 8 PM inclusive

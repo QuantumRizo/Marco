@@ -4,6 +4,7 @@ export interface Hospital {
     name: string;
     address: string;
     image: string;
+    allowedDaysText?: string; // Informational label for UI
 }
 
 export type AppointmentReason = 'first-visit' | 'follow-up' | 'specific-service';
@@ -97,26 +98,10 @@ export interface Appointment {
     appId?: string;
 }
 
-export interface HospitalSchedule {
-    allowedDays: number[]; // 0 = Sunday, 1 = Monday, etc.
-}
-
 export const APPOINTMENT_CONFIG = {
     START_HOUR: 9, // 9:00 AM
     END_HOUR: 15,  // 3:00 PM
     INTERVAL_MINUTES: 30
-};
-
-export const HOSPITAL_SCHEDULES: Record<string, HospitalSchedule> = {
-    'hosp-angeles': {
-        allowedDays: [3, 6] // Wednesday (3), Saturday (6)
-    },
-    'hosp-star-lomas': {
-        allowedDays: [2, 5] // Tuesday (2), Friday (5)
-    },
-    'hosp-star-luna': {
-        allowedDays: [1, 4] // Monday (1), Thursday (4)
-    }
 };
 
 export const HOSPITALS: Hospital[] = [
@@ -124,19 +109,22 @@ export const HOSPITALS: Hospital[] = [
         id: 'hosp-angeles',
         name: 'Hospital Angeles Lindavista',
         address: 'Ciudad de México',
-        image: '/placeholder.svg'
+        image: '/placeholder.svg',
+        allowedDaysText: 'Miércoles y Sábado'
     },
     {
         id: 'hosp-star-lomas',
         name: 'Star Médica Lomas Verdes',
         address: 'Naucalpan de Juárez, Méx.',
-        image: '/placeholder.svg'
+        image: '/placeholder.svg',
+        allowedDaysText: 'Martes y Viernes'
     },
     {
         id: 'hosp-star-luna',
         name: 'Star Médica Luna Parc',
         address: 'Cuautitlán Izcalli, Méx.',
-        image: '/placeholder.svg'
+        image: '/placeholder.svg',
+        allowedDaysText: 'Lunes y Jueves'
     }
 ];
 
