@@ -37,9 +37,6 @@ export const StepHospital = ({ hospitals, selectedHospitalId, onSelect, onNext }
                         <div className="space-y-1">
                             <h3 className="font-bold text-lg text-[#1c334a]">{hospital.name}</h3>
                             <p className="text-sm text-gray-500">{hospital.address}</p>
-                            {hospital.allowedDaysText && (
-                                <p className="text-xs text-primary font-medium">Días: {hospital.allowedDaysText}</p>
-                            )}
                         </div>
                     </Card>
                 ))}

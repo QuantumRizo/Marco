@@ -36,7 +36,6 @@ interface Appointment {
     id: string;
     date: string;
     time: string;
-    status: string;
     patientId: string;
     reason: string;
     serviceName?: string;
@@ -95,8 +94,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
     // Appointments for selected hospital
     const getDayAppointments = (day: Date) => {
         return appointments.filter(a =>
-            isSameDay(parseISO(a.date), day) &&
-            a.status !== 'cancelled'
+            isSameDay(parseISO(a.date), day)
         ).sort((a, b) => a.time.localeCompare(b.time));
     };
 
@@ -147,21 +145,17 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
         }
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'confirmed': return 'bg-green-100 text-green-800 border-green-500';
-            case 'cancelled': return 'bg-red-100 text-red-800 border-red-500';
+    const getStatusColor = (reason: string) => {
+        switch (reason) {
             case 'blocked': return 'bg-gray-100 text-gray-600 border-gray-500';
-            default: return 'bg-green-100 text-green-800 border-green-500'; // Default everything else to confirmed visual
+            default: return 'bg-green-100 text-green-800 border-green-500';
         }
     };
 
-    const getStatusLabel = (status: string) => {
-        switch (status) {
-            case 'confirmed': return 'Confirmada';
-            case 'cancelled': return 'Cancelada';
+    const getStatusLabel = (reason: string) => {
+        switch (reason) {
             case 'blocked': return 'Bloqueado';
-            default: return 'Confirmada'; // Map legacy statuses to Confirmada
+            default: return 'Confirmada';
         }
     };
 
@@ -237,7 +231,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                         <button
                                                             className={`
                                                                 text-[10px] text-left px-1.5 py-1 rounded w-full border-l-2 font-medium transition-all hover:brightness-95
-                                                                ${getStatusColor(apt.status)}
+                                                                ${getStatusColor(apt.reason)}
                                                                 ${isBefore(parseISO(apt.date), startOfToday()) ? 'opacity-50 grayscale' : ''}
                                                             `}
                                                             onClick={(e) => e.stopPropagation()}
@@ -349,7 +343,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                 ) : (
                                                                     <>
                                                                         {/* Edit Button */}
-                                                                        {apt.status !== 'blocked' && (
+                                                                        {apt.reason !== 'blocked' && (
                                                                             <Button
                                                                                 variant="outline"
                                                                                 className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
@@ -428,8 +422,8 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                     {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason === 'follow-up' ? 'Seguimiento' : apt.reason)}
                                                 </span>
                                                 <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                                                <Badge variant="outline" className={`text-[9px] h-4 px-1 ${getStatusColor(apt.status)} border-0`}>
-                                                    {getStatusLabel(apt.status)}
+                                                <Badge variant="outline" className={`text-[9px] h-4 px-1 ${getStatusColor(apt.reason)} border-0`}>
+                                                    {getStatusLabel(apt.reason)}
                                                 </Badge>
                                             </div>
                                         </div>
@@ -543,7 +537,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                             </div>
                                         ) : (
                                             <>
-                                                {apt.status !== 'blocked' && (
+                                                {apt.reason !== 'blocked' && (
                                                     <Button
                                                         variant="outline"
                                                         className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
@@ -633,9 +627,9 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                             {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason === 'follow-up' ? 'Seguimiento' : apt.reason)}
                                                                         </span>
                                                                         <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                                                                        <Badge variant="outline" className={`text-[9px] h-4 px-1 ${getStatusColor(apt.status)} border-0`}>
-                                                                            {getStatusLabel(apt.status)}
-                                                                        </Badge>
+                                                                                <Badge variant="outline" className={`text-[9px] h-4 px-1 ${getStatusColor(apt.reason)} border-0`}>
+                                                                                    {getStatusLabel(apt.reason)}
+                                                                                </Badge>
                                                                     </div>
                                                                 </div>
 
@@ -716,7 +710,7 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                         </div>
                                                                     ) : (
                                                                         <>
-                                                                            {apt.status !== 'blocked' && (
+                                                                            {apt.reason !== 'blocked' && (
                                                                                 <Button
                                                                                     variant="outline"
                                                                                     className="w-full mt-2"

@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { Appointment, Patient } from '../types';
-import { HOSPITALS, SERVICES } from '../types';
+import { SERVICES } from '../types';
+import type { Appointment, Patient, Hospital } from '../types';
 import { isAppointmentPast } from '@/lib/dateUtils';
+import { useAuth } from '@/contexts/AuthContext';
 
-const APP_ID = 'marco'; // Hardcoded for this specific application
 
 export const useAppointments = () => {
+    const { appId: APP_ID } = useAuth(); // Get dynamic APP_ID from AuthContext
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [patients, setPatients] = useState<Patient[]>([]);
+    const [hospitals, setHospitals] = useState<Hospital[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchData = useCallback(async () => {
@@ -46,11 +48,9 @@ export const useAppointments = () => {
                     reason: a.reason,
                     date: dateStr,
                     time: timeStr,
-                    status: a.status,
                     serviceName: a.service_name,
                     specificService: a.specific_service,
-                    clinicalData: a.clinical_data,
-                    patient: Array.isArray(a.patients) ? a.patients[0] : a.patients, // Added patient object
+                    patient: Array.isArray(a.patients) ? a.patients[0] : a.patients,
                     appId: a.app_id
                 };
             });
@@ -62,6 +62,21 @@ export const useAppointments = () => {
                 .eq('app_id', APP_ID); // FILTER ADDED
 
             if (patientsError) throw patientsError;
+            
+            // Fetch Hospitals - FILTERED BY APP_ID
+            const { data: hospitalsData, error: hospitalsError } = await supabase
+                .from('hospitals')
+                .select('*')
+                .eq('app_id', APP_ID);
+
+            if (hospitalsError) throw hospitalsError;
+
+            const mappedHospitals: Hospital[] = (hospitalsData || []).map((h: any) => ({
+                id: h.id,
+                name: h.name,
+                address: h.address,
+                image: h.image
+            }));
 
             const mappedPatients = (patientsData || []).map((p: any) => ({
                 ...p,
@@ -71,13 +86,14 @@ export const useAppointments = () => {
 
             setAppointments(mappedAppointments);
             setPatients(mappedPatients as Patient[] || []);
+            setHospitals(mappedHospitals);
 
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
             setLoading(false);
         }
-    }, []); // stable reference — supabase and APP_ID are module-level constants
+    }, [APP_ID]); // Re-fetch data if APP_ID changes
 
     useEffect(() => {
         fetchData();
@@ -92,6 +108,11 @@ export const useAppointments = () => {
             .on(
                 'postgres_changes',
                 { event: '*', schema: 'public', table: 'patients', filter: `app_id=eq.${APP_ID}` },
+                () => { fetchData(); }
+            )
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'hospitals', filter: `app_id=eq.${APP_ID}` },
                 () => { fetchData(); }
             )
             .subscribe();
@@ -178,7 +199,7 @@ export const useAppointments = () => {
                 .select('id')
                 .eq('app_id', APP_ID)
                 .eq('date', isoDateTime)
-                .neq('status', 'cancelled');
+                ;
 
             if (conflictError) throw conflictError;
 
@@ -194,11 +215,9 @@ export const useAppointments = () => {
                 .insert([{
                     patient_id: patientId,
                     hospital_id: appointmentData.hospitalId,
-                    service_name: appointmentData.serviceName, // Added service_name
                     reason: appointmentData.reason,
                     specific_service: appointmentData.specificService,
                     date: isoDateTime,
-                    status: 'confirmed',
                     app_id: APP_ID
                 }]);
 
@@ -243,8 +262,7 @@ export const useAppointments = () => {
 
         // Existing appointments for this day (GLOBAL across hospitals) from STATE
         const existingForDay = appointments.filter(a =>
-            a.date === date &&
-            a.status !== 'cancelled'
+            a.date === date
         );
 
         // Calculate now explicitly for Mexico timezone to avoid local PC issues
@@ -369,7 +387,7 @@ export const useAppointments = () => {
                 .select('id')
                 .eq('app_id', APP_ID)
                 .eq('date', isoDateTime)
-                .neq('status', 'cancelled');
+                ;
 
             if (conflictError) throw conflictError;
             if (conflictAppointments && conflictAppointments.length > 0) {
@@ -381,8 +399,7 @@ export const useAppointments = () => {
                 .insert([{
                     patient_id: blockPatientId,
                     hospital_id: hospitalId,
-                    reason: 'specific-service',
-                    status: 'blocked',
+                    reason: 'blocked',
                     date: isoDateTime,
                     specific_service: 'Horario Bloqueado Manualmente',
                     app_id: APP_ID
@@ -397,26 +414,6 @@ export const useAppointments = () => {
         }
     };
 
-    const updateAppointmentStatus = async (appointmentId: string, status: string) => {
-        try {
-            const existing = appointments.find(a => a.id === appointmentId);
-            if (existing && isAppointmentPast(existing.date, existing.time)) {
-                throw new Error("No se puede modificar el estado de citas pasadas.");
-            }
-
-            const { error } = await supabase
-                .from('appointments')
-                .update({ status })
-                .eq('id', appointmentId);
-
-            if (error) throw error;
-            await fetchData();
-        } catch (error) {
-            console.error('Error updating status:', error);
-            throw error;
-        }
-    };
-
     const updateAppointment = async (appointmentId: string, updates: Partial<Appointment>) => {
         try {
             const existing = appointments.find(a => a.id === appointmentId);
@@ -426,9 +423,7 @@ export const useAppointments = () => {
 
             // Adjust payload for DB (camelCase → snake_case)
             const dbUpdates: any = {};
-            if (updates.status) dbUpdates.status = updates.status;
             if (updates.specificService) dbUpdates.specific_service = updates.specificService;
-            if (updates.clinicalData) dbUpdates.clinical_data = updates.clinicalData;
             if (updates.date && updates.time) {
                 const newIsoDateTime = `${updates.date}T${updates.time}:00`;
 
@@ -438,8 +433,7 @@ export const useAppointments = () => {
                     .select('id')
                     .eq('app_id', APP_ID)
                     .eq('date', newIsoDateTime)
-                    .neq('id', appointmentId) // Exclude current appointment
-                    .neq('status', 'cancelled');
+                    .neq('id', appointmentId); // Exclude current appointment
 
                 if (conflictError) throw conflictError;
                 if (conflictAppointments && conflictAppointments.length > 0) {
@@ -520,12 +514,11 @@ export const useAppointments = () => {
         saveAppointment,
         getAvailableSlots,
         getAppointmentsByHospital,
-        hospitals: HOSPITALS,
+        hospitals,
         services: SERVICES,
         updatePatient,
         deleteAppointment,
         deletePatient,
-        updateAppointmentStatus,
         updateAppointment,
         blockSlot,
         addPatient,

@@ -12,10 +12,11 @@ import { AddPatientDialog } from './AddPatientDialog';
 import { AdminAppointmentDialog } from './AdminAppointmentDialog';
 import { BookingTypeDialog } from './BookingTypeDialog';
 import { GlobalSearch } from './GlobalSearch';
-import { supabase } from '@/lib/supabase';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const AdminDashboard = () => {
+    const { appId, fullName, signOut } = useAuth();
     const { hospitals, blockSlot, saveAppointment, addPatient, getAvailableSlots, patients } = useAppointments();
 
     // Helper helper
@@ -75,7 +76,7 @@ export const AdminDashboard = () => {
     };
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
+        await signOut();
         navigate('/login');
     };
 
@@ -97,7 +98,9 @@ export const AdminDashboard = () => {
                                 </div>
                                 <div>
                                     <h1 className="text-lg lg:text-xl font-bold tracking-tight leading-none">Panel Médico</h1>
-                                    <span className="text-[10px] lg:text-xs text-white/60 font-medium">Dr. Marco Alvarado</span>
+                                    <span className="text-[10px] lg:text-xs text-white/60 font-medium">
+                                        {fullName || 'Cargando...'}
+                                    </span>
                                 </div>
                             </div>
 

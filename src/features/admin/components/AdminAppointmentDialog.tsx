@@ -237,15 +237,6 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="admin-date">Fecha *</Label>
-                                    {selectedHospital?.allowedDaysText && (
-                                        <div className="text-[10px] text-blue-600 font-medium mb-1 leading-tight">
-                                            Días habituales: {selectedHospital.allowedDaysText}
-                                            <br />
-                                            <span className="text-amber-600 font-semibold">
-                                                * Si agenda fuera de estos días, favor de confirmar con el Dr. Marco.
-                                            </span>
-                                        </div>
-                                    )}
                                     <Input
                                         id="admin-date"
                                         type="date"

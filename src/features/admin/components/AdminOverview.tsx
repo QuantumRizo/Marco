@@ -70,25 +70,21 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
     // Metrics
     // Metrics (Global Aggregation)
     const todayAppointments = appointments.filter(a =>
-        isToday(parseISO(a.date)) &&
-        a.status !== 'cancelled'
+        isToday(parseISO(a.date))
     );
 
     const activeHospitalsCount = new Set(
-        appointments.filter(a => a.status !== 'cancelled').map(a => a.hospitalId)
+        appointments.map(a => a.hospitalId)
     ).size;
 
     // const newPatientsThisWeek = ... // Removed unused variable
 
     const weekAppointments = appointments.filter(a =>
-        isThisWeek(parseISO(a.date)) &&
-        a.status !== 'cancelled'
+        isThisWeek(parseISO(a.date))
     );
 
     const totalActivePatients = new Set(
-        appointments
-            .filter(a => a.status !== 'cancelled')
-            .map(a => a.patientId)
+        appointments.map(a => a.patientId)
     ).size;
 
     return (
@@ -201,11 +197,11 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2 shrink-0 pl-2">
-                                                    <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-medium border ${apt.status === 'cancelled'
-                                                        ? 'bg-red-50 text-red-700 border-red-100'
-                                                        : 'bg-green-50 text-green-700 border-green-100'}`}>
-                                                        {apt.status === 'cancelled' ? 'Cancelada' : 'Confirmada'}
-                                                    </span>
+                                                    {apt.reason === 'blocked' && (
+                                                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-medium border bg-gray-50 text-gray-700 border-gray-100">
+                                                            Bloqueado
+                                                        </span>
+                                                    )}
                                                     <Dialog onOpenChange={(open) => !open && cancelEditing()}>
                                                         {!isAppointmentPast(apt.date, apt.time) ? (
                                                             <DialogTrigger asChild>
@@ -316,7 +312,7 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
                                                                         </div>
                                                                     ) : (
                                                                         <>
-                                                                            {apt.status !== 'blocked' && apt.status !== 'cancelled' && (
+                                                                            {apt.reason !== 'blocked' && (
                                                                                 <Button
                                                                                     variant="outline"
                                                                                     className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
@@ -489,7 +485,7 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
                                                                         </div>
                                                                     ) : (
                                                                         <>
-                                                                            {apt.status !== 'blocked' && apt.status !== 'cancelled' && (
+                                                                            {apt.reason !== 'blocked' && (
                                                                                 <Button
                                                                                     variant="outline"
                                                                                     className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50"
@@ -530,7 +526,7 @@ export const AdminOverview = ({ }: AdminOverviewProps) => {
                             <CardContent className="p-4 pt-0">
                                 <div className="space-y-3">
                                     {hospitals.map(hospital => {
-                                        const hospitalAppts = appointments.filter(a => a.hospitalId === hospital.id && a.status !== 'cancelled');
+                                        const hospitalAppts = appointments.filter(a => a.hospitalId === hospital.id);
                                         // const hospitalPatients = new Set(hospitalAppts.map(a => a.patientId)).size;
                                         const todayHospitalAppts = hospitalAppts.filter(a => isToday(parseISO(a.date))).length;
 

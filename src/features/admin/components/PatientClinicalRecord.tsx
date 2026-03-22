@@ -172,11 +172,11 @@ export const PatientClinicalRecord = ({
     const today = new Date();
     const upcomingAppts = patientAppointments.filter(a => {
         const apptDate = new Date(a.date + 'T' + a.time);
-        return isAfter(apptDate, today) && a.status !== 'cancelled' && a.status !== 'blocked';
+        return isAfter(apptDate, today) && a.reason !== 'blocked';
     });
     const pastAppts = patientAppointments.filter(a => {
         const apptDate = new Date(a.date + 'T' + a.time);
-        return !isAfter(apptDate, today) || a.status === 'cancelled' || a.status === 'blocked';
+        return !isAfter(apptDate, today) || a.reason === 'blocked';
     });
 
     return (
@@ -429,7 +429,8 @@ export const PatientClinicalRecord = ({
                                             <div className="text-xs text-gray-600 font-medium truncate mb-2">{appt.reason === 'specific-service' ? appt.serviceName : appt.reason === 'first-visit' ? 'Primera vez' : appt.reason === 'follow-up' ? 'Seguimiento' : appt.reason}</div>
                                             
                                             <div className="flex justify-between items-center gap-2 mt-2">
-                                                <Badge variant="outline" className="text-[10px] uppercase font-bold px-2 py-0 border-blue-200 text-blue-700 bg-blue-50 shrink-0">Agendada</Badge>
+                                                {appt.reason === 'blocked' && <Badge variant="outline" className="text-[10px] uppercase font-bold px-2 py-0 border-gray-200 text-gray-500 bg-gray-50 shrink-0">Bloqueada</Badge>}
+                                                {appt.reason !== 'blocked' && <Badge variant="outline" className="text-[10px] uppercase font-bold px-2 py-0 border-blue-200 text-blue-700 bg-blue-50 shrink-0">Agendada</Badge>}
                                                 
                                                 <div className="flex gap-1 items-center">
                                                     <Dialog onOpenChange={(open) => !open && cancelEditing()}>
@@ -536,7 +537,7 @@ export const PatientClinicalRecord = ({
                                                                         </div>
                                                                     ) : (
                                                                         <>
-                                                                            {appt.status !== 'blocked' && appt.status !== 'cancelled' && (
+                                                                            {appt.reason !== 'blocked' && (
                                                                                 <Button variant="outline" className="w-full mt-2 border-blue-200 text-blue-700 hover:bg-blue-50" onClick={() => startEditing(appt)}>
                                                                                     <Edit2 className="w-4 h-4 mr-2" /> Reprogramar Cita
                                                                                 </Button>
@@ -578,7 +579,7 @@ export const PatientClinicalRecord = ({
                                 <div className="divide-y divide-gray-100">
                                     {pastAppts.map(appt => (
                                         <div key={appt.id} className="p-4 flex items-start gap-4 hover:bg-gray-50 transition-colors opacity-80 hover:opacity-100 group">
-                                            <div className={`flex-shrink-0 w-1.5 h-full min-h-[50px] rounded-full scale-y-90 group-hover:scale-y-100 transition-transform ${appt.status === 'cancelled' ? 'bg-red-300' : 'bg-[#1c334a]/40'}`}></div>
+                                            <div className={`flex-shrink-0 w-1.5 h-full min-h-[50px] rounded-full scale-y-90 group-hover:scale-y-100 transition-transform ${appt.reason === 'blocked' ? 'bg-gray-300' : 'bg-[#1c334a]/40'}`}></div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="font-bold text-sm text-gray-700 uppercase tracking-wide">{format(parseISO(appt.date), 'dd MMM yy', { locale: es })}</span>
@@ -587,8 +588,8 @@ export const PatientClinicalRecord = ({
                                                 <div className="text-xs text-gray-500 truncate mb-2">{appt.reason === 'specific-service' ? appt.serviceName : appt.reason === 'first-visit' ? 'Primera vez' : appt.reason === 'follow-up' ? 'Seguimiento' : appt.reason}</div>
                                                 
                                                 <div className="flex justify-between items-center gap-2 mt-2">
-                                                    <Badge variant="outline" className={`text-[9px] uppercase font-bold px-1.5 py-0 ${appt.status === 'cancelled' ? 'border-red-200 text-red-600 bg-red-50' : 'border-gray-200 text-gray-500 bg-gray-50'}`}>
-                                                        {appt.status === 'cancelled' ? 'Cancelada' : appt.status === 'finished' ? 'Finalizada' : 'Pasada'}
+                                                    <Badge variant="outline" className={`text-[9px] uppercase font-bold px-1.5 py-0 ${appt.reason === 'blocked' ? 'border-gray-200 text-gray-400 bg-gray-50' : 'border-gray-200 text-gray-500 bg-gray-50'}`}>
+                                                        {appt.reason === 'blocked' ? 'Bloqueada' : 'Pasada'}
                                                     </Badge>
 
                                                     <div className="flex gap-1 items-center">

@@ -108,11 +108,11 @@ export const PatientDirectory = ({ onBookAppointment }: PatientDirectoryProps) =
         const today = new Date();
         const upcoming = patientAppts.filter(a => {
             const apptDate = new Date(a.date + 'T' + a.time);
-            return isAfter(apptDate, today) && a.status !== 'cancelled' && a.status !== 'blocked';
+            return isAfter(apptDate, today) && a.reason !== 'blocked';
         });
         const history = patientAppts.filter(a => {
             const apptDate = new Date(a.date + 'T' + a.time);
-            return !isAfter(apptDate, today) || a.status === 'cancelled' || a.status === 'blocked';
+            return !isAfter(apptDate, today) || a.reason === 'blocked';
         });
 
         return { upcoming, history };

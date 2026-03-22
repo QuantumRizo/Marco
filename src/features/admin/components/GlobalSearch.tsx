@@ -60,6 +60,9 @@ export const GlobalSearch = ({ onSelectPatient }: GlobalSearchProps) => {
         return hospitals.find((h: any) => h.id === lastAppt.hospitalId)?.name || "Desconocido";
     };
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize today to start of day
+
     return (
         <div className="relative w-full max-w-xl mx-auto md:mx-0" ref={containerRef}>
             <div className="relative">
@@ -132,14 +135,11 @@ export const GlobalSearch = ({ onSelectPatient }: GlobalSearchProps) => {
                                                 </div>
                                                 <div className="text-xs text-gray-500">{appt.serviceName || (appt.reason === 'first-visit' ? 'Primera vez' : appt.reason === 'follow-up' ? 'Seguimiento' : appt.reason)}</div>
                                             </div>
-                                            <div className={`text-xs px-2 py-1 rounded-full capitalize ${appt.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                                                appt.status === 'finished' ? 'bg-gray-100 text-gray-700' :
-                                                    'bg-blue-50 text-blue-700'
-                                                }`}>
-                                                {appt.status === 'waiting_room' ? 'En espera' :
-                                                    appt.status === 'in_progress' ? 'En consulta' :
-                                                        appt.status}
-                                            </div>
+                                            {appt.reason === 'blocked' && (
+                                                <div className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                                                    Bloqueado
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 {appointments.filter((a: Appointment) => a.patientId === previewPatient?.id).length === 0 && (

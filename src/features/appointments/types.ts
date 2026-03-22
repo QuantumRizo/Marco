@@ -4,10 +4,9 @@ export interface Hospital {
     name: string;
     address: string;
     image: string;
-    allowedDaysText?: string; // Informational label for UI
 }
 
-export type AppointmentReason = 'first-visit' | 'follow-up' | 'specific-service';
+export type AppointmentReason = 'first-visit' | 'follow-up' | 'specific-service' | 'blocked';
 
 export interface Service {
     id: string;
@@ -92,9 +91,7 @@ export interface Appointment {
     reason: AppointmentReason;
     date: string; // ISO String
     time: string; // "10:30"
-    status: 'confirmed' | 'pending' | 'cancelled' | 'completed' | 'blocked' | 'waiting_room' | 'in_progress' | 'finished';
     specificService?: string;
-    clinicalData?: SoapNote; // JSONB from DB
     appId?: string;
 }
 
@@ -104,29 +101,6 @@ export const APPOINTMENT_CONFIG = {
     INTERVAL_MINUTES: 30
 };
 
-export const HOSPITALS: Hospital[] = [
-    {
-        id: 'hosp-angeles',
-        name: 'Hospital Angeles Lindavista',
-        address: 'Ciudad de México',
-        image: '/placeholder.svg',
-        allowedDaysText: 'Miércoles y Sábado'
-    },
-    {
-        id: 'hosp-star-lomas',
-        name: 'Star Médica Lomas Verdes',
-        address: 'Naucalpan de Juárez, Méx.',
-        image: '/placeholder.svg',
-        allowedDaysText: 'Martes y Viernes'
-    },
-    {
-        id: 'hosp-star-luna',
-        name: 'Star Médica Luna Parc',
-        address: 'Cuautitlán Izcalli, Méx.',
-        image: '/placeholder.svg',
-        allowedDaysText: 'Lunes y Jueves'
-    }
-];
 
 export const SERVICES: Service[] = [
     {
