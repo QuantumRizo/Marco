@@ -1,4 +1,16 @@
 {
+    "redirects": [
+        {
+            "source": "/admin(.*)",
+            "destination": "https://medicadmin.vercel.app/login",
+            "permanent": false
+        },
+        {
+            "source": "/login",
+            "destination": "https://medicadmin.vercel.app/login",
+            "permanent": false
+        }
+    ],
     "rewrites": [
         {
             "source": "/(.*)",
