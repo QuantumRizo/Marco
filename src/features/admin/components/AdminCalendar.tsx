@@ -40,7 +40,7 @@ interface Appointment {
     patientId: string;
     reason: string;
     serviceName?: string;
-    notes?: string;
+    specificService?: string;
 }
 
 export const AdminCalendar = (_props: AdminCalendarProps) => {
@@ -335,10 +335,10 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                                                     <span className="font-semibold text-gray-700 block mb-1">Motivo:</span>
                                                                     {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason === 'follow-up' ? 'Seguimiento' : apt.reason)}
                                                                 </div>
-                                                                {apt.notes && (
+                                                                {apt.specificService && (
                                                                     <div className="bg-yellow-50 p-3 rounded-md text-sm border border-yellow-100">
-                                                                        <span className="font-semibold text-yellow-800 block mb-1">Notas:</span>
-                                                                        {apt.notes}
+                                                                        <span className="font-semibold text-yellow-800 block mb-1">Detalles:</span>
+                                                                        {apt.specificService}
                                                                     </div>
                                                                 )}
 
@@ -531,10 +531,10 @@ export const AdminCalendar = (_props: AdminCalendarProps) => {
                                             <span className="font-semibold text-gray-700 block mb-1">Motivo:</span>
                                             {apt.reason === 'specific-service' ? apt.serviceName : (apt.reason === 'first-visit' ? 'Primera vez' : apt.reason === 'follow-up' ? 'Seguimiento' : apt.reason)}
                                         </div>
-                                        {apt.notes && (
+                                        {apt.specificService && (
                                             <div className="bg-yellow-50 p-3 rounded-md text-sm border border-yellow-100">
-                                                <span className="font-semibold text-yellow-800 block mb-1">Notas:</span>
-                                                {apt.notes}
+                                                <span className="font-semibold text-yellow-800 block mb-1">Detalles:</span>
+                                                {apt.specificService}
                                             </div>
                                         )}
                                         {isAppointmentPast(apt.date, apt.time) ? (

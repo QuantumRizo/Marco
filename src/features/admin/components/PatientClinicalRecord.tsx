@@ -523,10 +523,10 @@ export const PatientClinicalRecord = ({
                                                                         <span className="font-semibold text-gray-700 block mb-1">Motivo:</span>
                                                                         {appt.reason === 'specific-service' ? appt.serviceName : (appt.reason === 'first-visit' ? 'Primera vez' : appt.reason === 'follow-up' ? 'Seguimiento' : appt.reason)}
                                                                     </div>
-                                                                    {appt.notes && (
+                                                                    {appt.specificService && (
                                                                         <div className="bg-yellow-50 p-3 rounded-md text-sm border border-yellow-100">
-                                                                            <span className="font-semibold text-yellow-800 block mb-1">Notas:</span>
-                                                                            {appt.notes}
+                                                                            <span className="font-semibold text-yellow-800 block mb-1">Detalles:</span>
+                                                                            {appt.specificService}
                                                                         </div>
                                                                     )}
 
@@ -645,10 +645,10 @@ export const PatientClinicalRecord = ({
                                                                         <span className="font-semibold text-gray-700 block mb-1">Motivo:</span>
                                                                         {appt.reason === 'specific-service' ? appt.serviceName : (appt.reason === 'first-visit' ? 'Primera vez' : appt.reason === 'follow-up' ? 'Seguimiento' : appt.reason)}
                                                                     </div>
-                                                                    {appt.notes && (
+                                                                    {appt.specificService && (
                                                                         <div className="bg-yellow-50 p-3 rounded-md text-sm border border-yellow-100">
-                                                                            <span className="font-semibold text-yellow-800 block mb-1">Notas:</span>
-                                                                            {appt.notes}
+                                                                            <span className="font-semibold text-yellow-800 block mb-1">Detalles:</span>
+                                                                            {appt.specificService}
                                                                         </div>
                                                                     )}
                                                                     {/* Note: since this is past appointments, we only show it as read-only */}

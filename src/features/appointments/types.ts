@@ -86,13 +86,14 @@ export interface Patient {
 export interface Appointment {
     id: string;
     patientId: string;
+    patient?: Patient;
     hospitalId: string;
     serviceName?: string; // Denormalized for easier display
     reason: AppointmentReason;
     date: string; // ISO String
     time: string; // "10:30"
     status: 'confirmed' | 'pending' | 'cancelled' | 'completed' | 'blocked' | 'waiting_room' | 'in_progress' | 'finished';
-    notes?: string;
+    specificService?: string;
     clinicalData?: SoapNote; // JSONB from DB
     appId?: string;
 }

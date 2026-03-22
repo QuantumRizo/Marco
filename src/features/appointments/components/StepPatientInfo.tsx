@@ -8,7 +8,6 @@ interface PatientInfo {
     name: string;
     email: string;
     phone: string;
-    notes: string;
 }
 
 interface StepPatientInfoProps {
@@ -91,16 +90,6 @@ export const StepPatientInfo = ({
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="notes">Notas Adicionales (Opcional)</Label>
-                    <textarea
-                        id="notes"
-                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        placeholder="¿Algo más que debamos saber?"
-                        value={info.notes}
-                        onChange={(e) => onChange('notes', e.target.value)}
-                    />
-                </div>
             </div>
 
             <div className="flex justify-between pt-4">

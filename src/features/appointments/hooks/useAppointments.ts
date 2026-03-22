@@ -48,8 +48,9 @@ export const useAppointments = () => {
                     time: timeStr,
                     status: a.status,
                     serviceName: a.service_name,
-                    notes: a.notes,
+                    specificService: a.specific_service,
                     clinicalData: a.clinical_data,
+                    patient: Array.isArray(a.patients) ? a.patients[0] : a.patients, // Added patient object
                     appId: a.app_id
                 };
             });
@@ -193,10 +194,11 @@ export const useAppointments = () => {
                 .insert([{
                     patient_id: patientId,
                     hospital_id: appointmentData.hospitalId,
+                    service_name: appointmentData.serviceName, // Added service_name
                     reason: appointmentData.reason,
+                    specific_service: appointmentData.specificService,
                     date: isoDateTime,
                     status: 'confirmed',
-                    notes: appointmentData.notes,
                     app_id: APP_ID
                 }]);
 
@@ -382,7 +384,7 @@ export const useAppointments = () => {
                     reason: 'specific-service',
                     status: 'blocked',
                     date: isoDateTime,
-                    notes: 'Horario Bloqueado Manualmente',
+                    specific_service: 'Horario Bloqueado Manualmente',
                     app_id: APP_ID
                 }]);
 
@@ -425,7 +427,7 @@ export const useAppointments = () => {
             // Adjust payload for DB (camelCase → snake_case)
             const dbUpdates: any = {};
             if (updates.status) dbUpdates.status = updates.status;
-            if (updates.notes) dbUpdates.notes = updates.notes;
+            if (updates.specificService) dbUpdates.specific_service = updates.specificService;
             if (updates.clinicalData) dbUpdates.clinical_data = updates.clinicalData;
             if (updates.date && updates.time) {
                 const newIsoDateTime = `${updates.date}T${updates.time}:00`;

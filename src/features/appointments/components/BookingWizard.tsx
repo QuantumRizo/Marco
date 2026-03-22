@@ -51,10 +51,6 @@ export const BookingWizard = () => {
         try {
             console.log("Starting appointment booking...");
             // Combine notes: Service Description + Patient Notes
-            const combinedNotes = [
-                selectedReason === 'specific-service' ? `Servicio: ${serviceDescription}` : '',
-                patientInfo.notes
-            ].filter(Boolean).join('\n\n');
 
             await saveAppointment({
                 id: crypto.randomUUID(),
@@ -65,7 +61,7 @@ export const BookingWizard = () => {
                 date: selectedDate!.toISOString().split('T')[0],
                 time: selectedTime!,
                 status: 'confirmed',
-                notes: combinedNotes
+                specificService: selectedReason === 'specific-service' ? serviceDescription : undefined
             }, {
                 id: crypto.randomUUID(),
                 ...patientInfo,

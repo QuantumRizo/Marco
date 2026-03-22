@@ -106,7 +106,7 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
                     date: appointment.date,
                     time: appointment.time,
                     reason: appointment.reason,
-                    notes: patient.notes // Using patient notes as appointment/patient notes
+                    specificService: appointment.reason === 'specific-service' ? appointment.serviceName : undefined
                 },
                 patient
             );
