@@ -60,7 +60,6 @@ export const BookingWizard = () => {
                 reason: selectedReason!,
                 date: selectedDate!.toISOString().split('T')[0],
                 time: selectedTime!,
-                status: 'confirmed',
                 specificService: selectedReason === 'specific-service' ? serviceDescription : undefined
             }, {
                 id: crypto.randomUUID(),

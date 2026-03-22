@@ -16,7 +16,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const AdminDashboard = () => {
-    const { appId, fullName, signOut } = useAuth();
+    const { fullName, signOut } = useAuth();
     const { hospitals, blockSlot, saveAppointment, addPatient, getAvailableSlots, patients } = useAppointments();
 
     // Helper helper
