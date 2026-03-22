@@ -4,6 +4,9 @@ export interface Hospital {
     name: string;
     address: string;
     image: string;
+    startTime: string;   // ej. '09:00'
+    endTime: string;     // ej. '20:30'
+    slotInterval: number; // ej. 30
 }
 
 export type AppointmentReason = 'first-visit' | 'follow-up' | 'specific-service' | 'blocked';

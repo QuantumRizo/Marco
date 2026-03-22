@@ -14,6 +14,8 @@ export const useAppointments = () => {
     const [loading, setLoading] = useState(true);
 
     const fetchData = useCallback(async () => {
+        if (!APP_ID) return; // Wait for appId to be available
+        
         try {
             setLoading(true);
             // Fetch Appointments - FILTERED BY APP_ID
@@ -75,7 +77,10 @@ export const useAppointments = () => {
                 id: h.id,
                 name: h.name,
                 address: h.address,
-                image: h.image
+                image: h.image,
+                startTime: h.start_time,
+                endTime: h.end_time,
+                slotInterval: h.slot_interval
             }));
 
             const mappedPatients = (patientsData || []).map((p: any) => ({
@@ -254,11 +259,18 @@ export const useAppointments = () => {
         }
     };
 
-    const getAvailableSlots = (date: string, _hospitalId: string) => {
+    const getAvailableSlots = (date: string, hospitalId: string) => {
+        const hospital = hospitals.find(h => h.id === hospitalId);
+        if (!hospital) return [];
+
         const slots: string[] = [];
-        const startHour = 9;
-        const endHour = 20.5; // 8 PM inclusive
-        const interval = 30;
+        // Use hospital specific configuration
+        const [startH, startM] = hospital.startTime.split(':').map(Number);
+        const [endH, endM] = hospital.endTime.split(':').map(Number);
+        
+        const startHour = startH + (startM / 60);
+        const endHour = endH + (endM / 60);
+        const interval = hospital.slotInterval;
 
         // Existing appointments for this day (GLOBAL across hospitals) from STATE
         const existingForDay = appointments.filter(a =>

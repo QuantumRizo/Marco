@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAppointments } from '../../appointments/hooks/useAppointments';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar as CalendarIcon, LayoutDashboard, Users, Lock, CalendarPlus, LogOut, Menu, X, UserPlus } from 'lucide-react';
+import { Calendar as CalendarIcon, LayoutDashboard, Users, Lock, CalendarPlus, LogOut, Menu, X, UserPlus, ShieldCheck } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { AdminOverview } from './AdminOverview';
@@ -89,12 +89,8 @@ export const AdminDashboard = () => {
                         {/* Top Row: Logo & Mobile Toggle */}
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-3">
-                                <div className="bg-white/10 p-2 rounded-full backdrop-blur-sm">
-                                    <img
-                                        src="/imagenes/logo.jpeg"
-                                        alt="Logo Dr. Marco Alvarado"
-                                        className="w-8 h-8 lg:w-10 lg:h-10 rounded-full object-cover border-2 border-white/20"
-                                    />
+                                <div className="bg-white/10 p-2.5 rounded-full backdrop-blur-sm border border-white/20">
+                                    <ShieldCheck className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
                                 </div>
                                 <div>
                                     <h1 className="text-lg lg:text-xl font-bold tracking-tight leading-none">Panel Médico</h1>
