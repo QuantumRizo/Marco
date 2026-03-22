@@ -18,7 +18,6 @@ export const BookingWizard = () => {
     const [step, setStep] = useState(1);
     const [selectedHospitalId, setSelectedHospitalId] = useState<string>();
     const [selectedReason, setSelectedReason] = useState<AppointmentReason>();
-    const [selectedServiceId, setSelectedServiceId] = useState<string>();
     const [serviceDescription, setServiceDescription] = useState<string>('');
     const [selectedDate, setSelectedDate] = useState<Date>();
     const [selectedTime, setSelectedTime] = useState<string>();
@@ -61,7 +60,6 @@ export const BookingWizard = () => {
                 id: crypto.randomUUID(),
                 hospitalId: selectedHospitalId!,
                 patientId: '', // Will be assigned in hook
-                serviceId: selectedServiceId, // Optional
                 serviceName: selectedReason === 'specific-service' ? serviceDescription : undefined,
                 reason: selectedReason!,
                 date: selectedDate!.toISOString().split('T')[0],
@@ -160,10 +158,7 @@ export const BookingWizard = () => {
                     <StepService
                         services={services}
                         selectedReason={selectedReason}
-                        selectedServiceId={selectedServiceId}
-                        serviceDescription={serviceDescription}
                         onSelectReason={setSelectedReason}
-                        onSelectService={setSelectedServiceId}
                         onServiceDescriptionChange={setServiceDescription}
                         onNext={handleNext}
                         onBack={handleBack}

@@ -87,7 +87,6 @@ export interface Appointment {
     id: string;
     patientId: string;
     hospitalId: string;
-    serviceId?: string;
     serviceName?: string; // Denormalized for easier display
     reason: AppointmentReason;
     date: string; // ISO String

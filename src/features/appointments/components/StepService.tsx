@@ -9,10 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 interface StepServiceProps {
     services: Service[];
     selectedReason?: AppointmentReason;
-    selectedServiceId?: string; // Kept for type compatibility but might be unused
     serviceDescription?: string;
     onSelectReason: (reason: AppointmentReason) => void;
-    onSelectService: (serviceId: string) => void;
     onServiceDescriptionChange?: (text: string) => void;
     onNext: () => void;
     onBack: () => void;

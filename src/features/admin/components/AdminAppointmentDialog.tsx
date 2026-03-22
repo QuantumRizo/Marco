@@ -69,7 +69,6 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
     });
 
     const [appointment, setAppointment] = useState({
-        serviceId: '',
         serviceName: '', // Added for specific service description
         date: '',
         time: '',
@@ -103,7 +102,6 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
             await onSave(
                 {
                     hospitalId: bookingHospitalId,
-                    serviceId: null, // We are not using strict service IDs anymore in this flow
                     serviceName: appointment.reason === 'specific-service' ? appointment.serviceName : undefined,
                     date: appointment.date,
                     time: appointment.time,
@@ -115,7 +113,7 @@ export const AdminAppointmentDialog = ({ hospitals, onSave, open, onOpenChange, 
             onOpenChange(false);
             // Reset form
             setPatient({ name: '', email: '', emailError: '', phone: '', notes: '' });
-            setAppointment({ serviceId: '', serviceName: '', date: '', time: '', reason: '' });
+            setAppointment({ serviceName: '', date: '', time: '', reason: '' });
             setBookingHospitalId(null);
         } catch (error: any) {
             console.error("Error scheduling:", error);

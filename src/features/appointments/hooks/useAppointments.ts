@@ -42,7 +42,6 @@ export const useAppointments = () => {
                 return {
                     id: a.id,
                     hospitalId: a.hospital_id,
-                    serviceId: a.service_id,
                     patientId: a.patient_id,
                     reason: a.reason,
                     date: dateStr,
@@ -194,7 +193,6 @@ export const useAppointments = () => {
                 .insert([{
                     patient_id: patientId,
                     hospital_id: appointmentData.hospitalId,
-                    service_id: appointmentData.serviceId || null,
                     reason: appointmentData.reason,
                     date: isoDateTime,
                     status: 'confirmed',
@@ -428,7 +426,6 @@ export const useAppointments = () => {
             const dbUpdates: any = {};
             if (updates.status) dbUpdates.status = updates.status;
             if (updates.notes) dbUpdates.notes = updates.notes;
-            if (updates.serviceId) dbUpdates.service_id = updates.serviceId;
             if (updates.clinicalData) dbUpdates.clinical_data = updates.clinicalData;
             if (updates.date && updates.time) {
                 const newIsoDateTime = `${updates.date}T${updates.time}:00`;
